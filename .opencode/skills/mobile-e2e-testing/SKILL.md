@@ -1,6 +1,6 @@
 ---
 name: mobile-e2e-testing
-description: 由 OpenCode 创建 spec-manager L3.2 与 Agent Task，为移动应用编写并运行自动化主流程测试，只覆盖 5 图锁定的 P0、本地 mock 数据与目标单端，分级缺陷并循环修复到无阻断问题，记录 verification evidence。Use when the user says 自动化测试、主流程测试、E2E、跑回归、阻断性问题、Maestro、Detox、Patrol、Espresso、XCUITest，or asks to verify an app before release.
+description: 由 OpenCode 创建 spec-manager L3.2 与 Agent Task，为移动应用编写并运行自动化主流程测试，只覆盖 5 图锁定的 P0、本地 mock 数据与目标单端，分级缺陷并循环修复到无阻断问题，记录 verification evidence。Use when the user says 自动化测试、主流程测试、E2E、跑回归、阻断性问题、Maestro、Detox、Patrol、XCUITest，or asks to verify an app before release.
 ---
 
 # 自动化主流程测试
@@ -62,8 +62,6 @@ spec-manager task create <L3.2> --plan tasks/<topic>-L3-e2e-plan.json --start
 | RN | Maestro / Detox | Maestro 黑盒、YAML 简单；Detox 灰盒、同步更稳 |
 | Expo | Maestro + EAS | 真机/模拟器均可，注意 dev build |
 | Flutter | integration_test + Patrol | Patrol 支持原生弹窗与权限 |
-| Kotlin | Compose UI Test + Espresso + UIAutomator | 跨 App 系统交互用 UIAutomator |
-| Java | Espresso + UIAutomator | 同上 |
 | 原生 iOS（OC / Swift / OC&Swift） | XCUITest + XCTest | 系统权限/推送/深链验证；给控件加 accessibilityIdentifier |
 | SwiftUI | XCUITest + XCTest | 用 `.accessibilityIdentifier`/`.accessibilityLabel`，避免文本选择器 |
 

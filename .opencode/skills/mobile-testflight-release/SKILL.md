@@ -119,12 +119,16 @@ xcodebuild -exportArchive -archivePath build/<Name>.xcarchive \
 - SwiftUI/UIKit 检查 AppIcon、启动屏、`NavigationStack`/`UINavigationController` 行为；Release 包不含 Preview/调试代码。
 - 用 `xcodebuild -showBuildSettings` 核对 `MARKETING_VERSION` / `CURRENT_PROJECT_VERSION`。
 
-**Kotlin / Java Android**
+**Android（RN / Flutter）**
 
 ```bash
-./gradlew bundleRelease
-# APK 仅用于内测分发时
-./gradlew assembleRelease
+# RN
+cd android && ./gradlew bundleRelease
+# 或 EAS
+npx eas build --platform android --profile production
+
+# Flutter
+flutter build appbundle --release
 ```
 
 构建日志写入 `build-log.md`：命令、时间、Commit、构建号、产物路径、校验值。

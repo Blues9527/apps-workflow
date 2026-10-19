@@ -210,7 +210,7 @@ spec-manager project doctor
 | `--prd` | 文件路径 / URL | 无 | 从已有 PRD 开始；默认从阶段 2 intake |
 | `--prd-spec` | 现有 L1 code | 无 | 已有 spec-manager L1；confirmed 默认从阶段 3 |
 | `--platform` | `auto` / `ios` / `android` / `both` | `auto` | 从链接推断；一个平台即可；`both` 缺少另一端时按已有平台继续 |
-| `--stack` | `auto` / `rn` / `flutter` / `kotlin` / `java` / `oc` / `swift` / `oc-swift` / `swift-swiftui` | `auto` | 有仓库时自动识别；`swift-swiftui` = Swift + SwiftUI |
+| `--stack` | `auto` / `rn` / `flutter` / `oc` / `swift` / `oc-swift` / `swift-swiftui` | `auto` | 有仓库时自动识别；`swift-swiftui` = Swift + SwiftUI |
 | `--market` | `cn` / `us` / `jp` / `zh-CN` / `en-US` 等 | 询问 | 目标市场与语言 |
 | `--repo` | 目录路径 / `none` | 当前目录 | 现有仓库 |
 | `--scope` | 自由文本 | 询问 | 首版范围；P0 最终由 5 图锁定 |
@@ -277,7 +277,7 @@ spec-manager project doctor
 /mobile-flow --dry-run --app "..." --platform ios --stack rn --market us
 
 # CI / 脚本式调用
-/mobile-flow --non-interactive --app "/path/to/app.apk" --app-name "DramaFlow" --platform android --stack kotlin --market cn --repo . --scope "P0 闭环" --channel play-internal --parallel 2 --deadline auto
+/mobile-flow --non-interactive --app "/path/to/app.apk" --app-name "DramaFlow" --platform android --stack flutter --market cn --repo . --scope "P0 闭环" --channel play-internal --parallel 2 --deadline auto
 ```
 
 不支持 `--skip-gates`、`--auto-approve`、`--yes`，也不接受在命令行传 Token、密码、API Key 或 keystore 密码；这些只从环境变量或 Keychain 读取。
@@ -351,7 +351,7 @@ Codex 未安装时自动降级 OpenCode 执行阶段 2/3（`codex_fallback=true`
 - 商店元数据: `app-store-prd-metadata`（fallback `app-store-listing`）
 - MCP: Stitch（已支持）、Figma、Lark
 - UI: Stitch、GPT、doubao、awwwards（仅参考）
-- 技术栈: React Native、Flutter、Kotlin、Java
+- 技术栈: React Native、Flutter
 - 原生 iOS: Objective-C、Swift、OC&Swift 混编、Swift&SwiftUI
 - 原生工具: Xcode、SPM / CocoaPods、XCTest / XCUITest
 - 逆向: 可选 `rea` skill（环境提供时）；不可用则回退公开分析

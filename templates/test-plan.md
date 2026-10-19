@@ -41,7 +41,7 @@
 
 ## 3. 框架
 
-- 框架: Maestro / Detox / Patrol / Espresso / XCUITest
+- 框架: Maestro / Detox / Patrol / XCUITest / XCTest
 - 选择理由:
 - 选择器规范:
 - 运行命令:

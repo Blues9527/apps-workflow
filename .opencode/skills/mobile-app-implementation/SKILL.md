@@ -1,6 +1,6 @@
 ---
 name: mobile-app-implementation
-description: 由 OpenCode 读取 confirmed L2 与 specs/DESIGN.md，写 L3.1 并冻结，创建 spec-manager Agent Task，只实现 5 图锁定的 P0 垂直切片，使用本地 mock 数据，支持 React Native、Flutter、Kotlin、Java、Objective-C、Swift、OC&Swift 混编、Swift&SwiftUI。Use when the user says 搭框架、填充功能、实现 PRD、开发 App、RN/Flutter/Kotlin/Java/OC/Swift/SwiftUI 实现、vertical slice、build the app skeleton，or asks to turn approved screens and requirements into working code.
+description: 由 OpenCode 读取 confirmed L2 与 specs/DESIGN.md，写 L3.1 并冻结，创建 spec-manager Agent Task，只实现 5 图锁定的 P0 垂直切片，使用本地 mock 数据，支持 React Native、Flutter、Objective-C、Swift、OC&Swift 混编、Swift&SwiftUI。Use when the user says 搭框架、填充功能、实现 PRD、开发 App、RN/Flutter/OC/Swift/SwiftUI 实现、vertical slice、build the app skeleton，or asks to turn approved screens and requirements into working code.
 ---
 
 # 框架搭建与功能填充
@@ -83,7 +83,7 @@ Android 先列任务：
 记录：
 
 - 目标平台：iOS 链接就按 iOS 构建，不要求 Android 工程；Android 链接就按 Android，`both` 才双端。
-- 框架与版本（RN/Expo、Flutter、Kotlin/Compose、Java/Views、Objective-C/UIKit、Swift/UIKit、SwiftUI）
+- 框架与版本（RN/Expo、Flutter、Objective-C/UIKit、Swift/UIKit、SwiftUI）
 - 导航、状态、数据层、存储、主题、测试现有方案
 - 是否已有设计系统、组件库、CI、发布脚本
 - 不要引入第二套导航/状态/网络库；必须引入时写 ADR
@@ -109,8 +109,6 @@ Android 先列任务：
 | --- | --- | --- | --- | --- | --- |
 | RN | React Navigation / Expo Router | Zustand / Redux Toolkit | TanStack Query + fetch/axios | MMKV / AsyncStorage | RNTL + Maestro/Detox |
 | Flutter | go_router | Riverpod / Bloc | Dio | Drift / Hive | integration_test / Patrol |
-| Kotlin | Navigation Compose | ViewModel + Flow | Retrofit/OkHttp | Room | Compose Test + Espresso |
-| Java | Navigation Component | ViewModel + LiveData | Retrofit/OkHttp | Room | JUnit + Espresso |
 | oc | UIKit + UINavigationController | MVC / MVVM | NSURLSession | Core Data / UserDefaults / Keychain | XCTest + XCUITest |
 | swift | UIKit + UINavigationController | MVVM + async/await | URLSession | Core Data / UserDefaults / Keychain | XCTest + XCUITest |
 | oc-swift | UIKit + Swift interop | MVVM + @objc/bridging | URLSession | Core Data / UserDefaults / Keychain | XCTest + XCUITest |

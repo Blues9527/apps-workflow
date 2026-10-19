@@ -33,7 +33,7 @@ $ARGUMENTS
 | `--prd` | 文件路径 / URL | 无 | 从已有 PRD 开始；复制为 source-prd.md，阶段 1 可跳过，默认从阶段 2 intake |
 | `--prd-spec` | 现有 L1 code，如 `myapp-L1` | 无 | 已有 spec-manager L1；confirmed 则默认从阶段 3 开始 |
 | `--platform` | `auto` / `ios` / `android` / `both` | `auto` | 从 `--app` 链接自动推断；**一个平台链接即可**；`both` 是交付目标，缺少另一端时按已有平台继续 |
-| `--stack` | `auto` / `rn` / `flutter` / `kotlin` / `java` / `oc` / `swift` / `oc-swift` / `swift-swiftui` | `auto` | 有仓库时自动识别；无仓库时询问；`swift-swiftui` 为 Swift + SwiftUI |
+| `--stack` | `auto` / `rn` / `flutter` / `oc` / `swift` / `oc-swift` / `swift-swiftui` | `auto` | 有仓库时自动识别；无仓库时询问；`swift-swiftui` 为 Swift + SwiftUI |
 | `--market` | `cn` / `us` / `jp` / `zh-CN` / `en-US` 等 | 询问 | 目标市场与语言，影响竞品、ASO、文案 |
 | `--repo` | 目录路径 | 当前目录 | 现有代码仓库；没有则写 `none` |
 | `--scope` | 自由文本 | 询问 | 首版范围；P0 最终由 5 图锁定 |
@@ -182,7 +182,7 @@ Agent 只会询问当前阶段真正缺失的信息；平台从链接推断，�
   --app "/path/to/app.apk" \
   --app-name "DramaFlow" \
   --platform android \
-  --stack kotlin \
+  --stack flutter \
   --market cn \
   --repo . \
   --scope "P0 闭环" \
