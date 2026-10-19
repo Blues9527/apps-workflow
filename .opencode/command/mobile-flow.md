@@ -18,6 +18,7 @@ $ARGUMENTS
 5. 冲突参数直接报错：`--only-stage` 与 `--from-stage` 互斥；`--resume` 与 `--restart` 互斥；`--prd` 与 `--prd-spec` 互斥。
 5.1 `--prd` 起点：默认从阶段 2 开始；只允许 `--from-stage 2` 或 `--only-stage 2`，其他阶段需先导入 L1 后用 `--prd-spec`。
 5.2 `--prd-spec`：L1 confirmed 自动从阶段 3 开始；draft 先进入阶段 2 review。
+5.3 `--app-name` 优先级最高；未提供时从 PRD/L1/主题推导，仍歧义则询问。
 6. 用户输入 `--help` 或 `-h` 时，只输出本文档的「参数」和「使用指引」，不执行工作流。
 7. 参数里不要传密钥、密码、Token、keystore 密码；这些只从环境变量或 Keychain 读取。
 
@@ -27,7 +28,8 @@ $ARGUMENTS
 
 | 参数 | 取值 | 默认 | 说明 |
 | --- | --- | --- | --- |
-| `--app` | 商店 URL / APK/IPA 路径 / App 名 | 无；无 PRD 时阶段 1 前必填 | 分析对象；有 `--prd`/`--prd-spec` 时可选 |
+| `--app` | 商店 URL / APK/IPA 路径 / App 名 | 无；无 PRD 时阶段 1 前必填 | **被分析的目标 App**；有 `--prd`/`--prd-spec` 时可选 |
+| `--app-name` | 产品名/品牌名，如 `"DramaFlow"` | 从 PRD/L1 或主题推导，否则询问 | **要构建的新产品名称**；用于 L1/L2、icon/splash、商店文案、归档；不是 `--app` |
 | `--prd` | 文件路径 / URL | 无 | 从已有 PRD 开始；复制为 source-prd.md，阶段 1 可跳过，默认从阶段 2 intake |
 | `--prd-spec` | 现有 L1 code，如 `myapp-L1` | 无 | 已有 spec-manager L1；confirmed 则默认从阶段 3 开始 |
 | `--platform` | `auto` / `ios` / `android` / `both` | `auto` | 从 `--app` 链接自动推断；**一个平台链接即可**；`both` 是交付目标，缺少另一端时按已有平台继续 |
@@ -121,6 +123,7 @@ $ARGUMENTS
 ```text
 /mobile-flow \
   --app "https://apps.apple.com/..." \
+  --app-name "DramaFlow" \
   --platform auto \
   --stack flutter \
   --market us \
@@ -177,6 +180,7 @@ Agent 只会询问当前阶段真正缺失的信息；平台从链接推断，�
 ```text
 /mobile-flow --non-interactive \
   --app "/path/to/app.apk" \
+  --app-name "DramaFlow" \
   --platform android \
   --stack kotlin \
   --market cn \
@@ -192,7 +196,7 @@ Agent 只会询问当前阶段真正缺失的信息；平台从链接推断，�
 ### 8. 从已有 PRD 开始
 
 ```text
-/mobile-flow --prd "./docs/prd.md" --platform ios --stack flutter --market us --topic myapp-p0
+/mobile-flow --prd "./docs/prd.md" --app-name "DramaFlow" --platform ios --stack flutter --market us --topic myapp-p0
 ```
 
 行为：
@@ -254,12 +258,15 @@ Agent 只会询问当前阶段真正缺失的信息；平台从链接推断，�
 - 每个阶段结束检查门禁，未通过不进入下一阶段。
 - G2、G3、G4（L3 冻结）、G7、G8 停下来等人工确认，不要自己签核。
 - 主题必须基于目标 App 二创/优化；有 PRD 时以 PRD 为准，不擅自改写范围。P0 以 5 图为最终边界。
+- `--app` 是分析对象，`--app-name` 是新产品名称；不要把两者混用。未提供 `--app-name` 时从 PRD/L1/主题推导，歧义时询问。
+- `--app-name` 贯穿 L1/L2 标题、specs/DESIGN.md、icon/splash、商店文案与 archive manifest。
 - `--prd` 起点：保存原始 PRD/hash，阶段 2 做 L1 intake；无 `--app` 时阶段 1 跳过，不伪造功能清单。
 - `--prd-spec` 已 confirmed 时直接进阶段 3；draft 时先 review L1。
 - 阶段 2/3 默认交给 Codex；先准备 handoff packet 并暂停，不要自己写 L1/L2。
 - 未安装 Codex 或 `--codex off` 时，自动降级 OpenCode 执行 L1/L2，标记 `codex_fallback`。
 - 阶段 4/5 由 OpenCode 执行；先写 L3 并冻结，再创建 Task 写代码。
 - 阶段 6 优先 `app-store-prd-metadata`；不可用自动回退 `app-store-listing`，标记 `skill_fallback`。
+- 阶段 6 截图：1320x2868 母版 + 1206x2622 medium tier，PNG/JPEG 无 alpha；保存 `gallery.json` 并用 `check_gallery.py --check-files` 校验。
 - 阶段 8 归档后工作流才算结束。
 - spec-manager 是 L1/L2/L3/Task/evidence 的共享真相；不伪造 specs/tasks/evidence。
 - `--spec-manager on` 时先 `project init`/`agents install`/`doctor`；`off` 时回退 artifacts 并标记 `spec-manager fallback`。

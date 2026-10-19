@@ -64,7 +64,7 @@ spec-manager project doctor
 ## 快速使用
 
 ```text
-/mobile-flow --app "https://apps.apple.com/..." --platform auto --stack flutter --market us --deadline auto --topic <topic>
+/mobile-flow --app "https://apps.apple.com/..." --app-name "DramaFlow" --platform auto --stack flutter --market us --deadline auto --topic <topic>
 ```
 
 只给一个平台链接即可；P0 由 5 图锁定，数据默认本地 mock，发布凭证到阶段 7 才需要。  
@@ -79,7 +79,7 @@ spec-manager project doctor
 ### 从已有 PRD 开始
 
 ```text
-/mobile-flow --prd "./docs/prd.md" --platform ios --stack flutter --market us --topic myapp-p0
+/mobile-flow --prd "./docs/prd.md" --app-name "DramaFlow" --platform ios --stack flutter --market us --topic myapp-p0
 ```
 
 - 原始 PRD 会复制到 `artifacts/02-prd/source-prd.md`，并记录 SHA256。
@@ -151,7 +151,7 @@ OpenCode 阶段 0-1
 | 3 设计系统/5 图/icon/splash/P0 | **Codex** | L2 + `specs/DESIGN.md` + `design/` |
 | 4 实现 | **OpenCode** | L3.1 + Agent Task |
 | 5 自动化测试 | **OpenCode** | L3.2 + Agent Task |
-| 6 App Store 元数据 | OpenCode（Codex 可选） | L3.3 + Task（优先 `app-store-prd-metadata`，fallback `app-store-listing`） |
+| 6 App Store 元数据 | OpenCode（Codex 可选） | L3.3 + Task（优先 `app-store-prd-metadata`，fallback `app-store-listing`）；截图 1320x2868 + 1206x2622 |
 | 7 发布/TestFlight | **OpenCode** | L3.4 + Task |
 | 8 归档/交接 | **OpenCode** | L3.5 + Task |
 
@@ -203,7 +203,8 @@ spec-manager project doctor
 
 | 参数 | 取值 | 默认 | 说明 |
 | --- | --- | --- | --- |
-| `--app` | 商店 URL / APK/IPA 路径 / App 名 | 无 PRD 时必填 | 分析对象；有 PRD 时可选 |
+| `--app` | 商店 URL / APK/IPA 路径 / App 名 | 无 PRD 时必填 | **被分析的目标 App**；有 PRD 时可选 |
+| `--app-name` | 产品名/品牌名 | 从 PRD/L1/主题推导 | **要构建的新产品名**；用于 L1/L2、icon/splash、商店文案、归档 |
 | `--prd` | 文件路径 / URL | 无 | 从已有 PRD 开始；默认从阶段 2 intake |
 | `--prd-spec` | 现有 L1 code | 无 | 已有 spec-manager L1；confirmed 默认从阶段 3 |
 | `--platform` | `auto` / `ios` / `android` / `both` | `auto` | 从链接推断；一个平台即可；`both` 缺少另一端时按已有平台继续 |
@@ -243,10 +244,10 @@ spec-manager project doctor
 
 ```text
 # 全流程（单端链接即可，自动排期，3 个 Agent 并行）
-/mobile-flow --app "https://apps.apple.com/..." --platform auto --stack flutter --market us --scope "基于目标 App 的核心闭环做优化" --deadline auto --parallel 3
+/mobile-flow --app "https://apps.apple.com/..." --app-name "DramaFlow" --platform auto --stack flutter --market us --scope "基于目标 App 的核心闭环做优化" --deadline auto --parallel 3
 
 # 分别从已有 PRD / 现有 L1 开始
-/mobile-flow --prd "./docs/prd.md" --platform ios --stack flutter --market us --topic myapp-p0
+/mobile-flow --prd "./docs/prd.md" --app-name "DramaFlow" --platform ios --stack flutter --market us --topic myapp-p0
 /mobile-flow --prd-spec myapp-L1 --from-stage 3
 
 # 最简启动，缺什么问什么
@@ -268,7 +269,7 @@ spec-manager project doctor
 /mobile-flow --dry-run --app "..." --platform ios --stack rn --market us
 
 # CI / 脚本式调用
-/mobile-flow --non-interactive --app "/path/to/app.apk" --platform android --stack kotlin --market cn --repo . --scope "P0 闭环" --channel play-internal --parallel 2 --deadline auto
+/mobile-flow --non-interactive --app "/path/to/app.apk" --app-name "DramaFlow" --platform android --stack kotlin --market cn --repo . --scope "P0 闭环" --channel play-internal --parallel 2 --deadline auto
 ```
 
 不支持 `--skip-gates`、`--auto-approve`、`--yes`，也不接受在命令行传 Token、密码、API Key 或 keystore 密码；这些只从环境变量或 Keychain 读取。
@@ -288,6 +289,7 @@ spec-manager project doctor
 - **OpenCode 分工**：阶段 4-8 先写 L3 并冻结，再创建 Agent Task 写代码/测试/文案/发布/归档。
 - **图标/启动图**：阶段 3 同时产出 app-icon 与 splash；阶段 4 接入，阶段 7 验证。
 - **商店元数据**：阶段 6 优先 `app-store-prd-metadata`；不可用自动回退 `app-store-listing`，标记 `skill_fallback`。
+- **商店截图**：5 图是编辑约定；1320x2868 母版 + 1206x2622 medium tier，PNG/JPEG 无 alpha；用 `check_gallery.py --check-files` 校验。
 - **归档**：阶段 8 生成 manifest/checksums/release summary，G8 通过才算结束。
 - **spec-manager 真相**：L1/L2/L3/Task/evidence 以 spec-manager 为准；不伪造、不跳过。
 
@@ -310,11 +312,11 @@ Codex 未安装时自动降级 OpenCode 执行阶段 2/3（`codex_fallback=true`
 | --- | --- | --- | --- |
 | 0 启动 | **OpenCode** | `00-intake.md`、`schedule.md`、`workflow-state.md`、spec-manager init（skill: `mobile-workflow`） | - |
 | 1 功能分析（可选） | **OpenCode** | 功能清单、页面、流程、规则、术语、Codex handoff（skill: `mobile-feature-analysis`） | G1（PRD 起点可跳过） |
-| 2 二创主题/竞品/PRD | **Codex** | `L1` + `theme.md`、`competitors.md`、`prd.md` | G2 |
-| 3 素材/5 图/icon/splash | **Codex** | `L2` + `specs/DESIGN.md` + `design/` | G3 |
+| 2 二创主题/竞品/PRD | **Codex** | `L1`（app_name）+ `theme.md`、`competitors.md`、`prd.md` | G2 |
+| 3 素材/5 图/icon/splash | **Codex** | `L2` + `specs/DESIGN.md`（app_name）+ `design/` | G3 |
 | 4 框架/填充 | **OpenCode** | `L3.1` + Task + 可运行 App | G4 |
 | 5 自动化测试 | **OpenCode** | `L3.2` + Task + 脚本/报告 | G5 |
-| 6 App Store 元数据 | OpenCode（Codex 可选） | `L3.3` + PRD metadata/`listing.md`/`release-notes.md`（优先 `app-store-prd-metadata`，fallback `app-store-listing`） | G6 |
+| 6 App Store 元数据 | OpenCode（Codex 可选） | `L3.3` + PRD metadata/`listing.md`/`release-notes.md`（App Name = app_name；优先 `app-store-prd-metadata`，fallback `app-store-listing`） | G6 |
 | 7 打包提测 | **OpenCode** | `L3.4` + Release 包、设备矩阵、提测单 | G7 |
 | 8 归档 | **OpenCode** | `L3.5` + archive manifest/checksums/release summary | G8 |
 
@@ -357,6 +359,7 @@ Stitch 相关 skill 使用 `stitch_*` MCP 工具：创建项目、设计系统�
 - **门禁不可跳过**：L1/L2 未 confirmed、L3 未 frozen 不写代码；G2/G3/G4/G7/G8 需要人工签核。
 - **5 图定 P0**：P0 = 5 图展示内容；5 图外默认 P1/P2。
 - **PRD 起点**：`--prd` 时保存原始 PRD/SHA256/`prd-intake.md`，不擅自改写范围；`--prd-spec` 已 confirmed 可直接从阶段 3 开始。
+- **App 命名**：`--app` 是分析对象，`--app-name` 是新产品名；未提供时从 PRD/L1/主题推导，不要混用。
 - **Mock 优先**：MVP 数据本地 mock，真实 API/CDN 不作为 P0 依赖。
 - **单端足够**：一个平台链接即可；另一平台可选后补。
 - **归档**：阶段 8 生成 archive manifest/checksums/release summary；归档中不得含密钥或大二进制。

@@ -262,7 +262,10 @@ artifacts/
 │   └── bugs.md                    # 缺陷单与分级
 ├── 06-store/
 │   ├── listing.md                 # 商店文案与截图字幕
-│   └── release-notes.md           # 对外/对内更新说明
+│   ├── release-notes.md           # 对外/对内更新说明
+│   ├── gallery.json               # 五图 manifest（可校验）
+│   ├── screenshots/               # 1320x2868 / 1206x2622 / iPad
+│   └── pages/                     # Privacy / Support / Terms
 ├── 07-release/
 │   ├── checklist.md               # 发布前检查
 │   ├── build-log.md               # 构建与上传记录
@@ -294,7 +297,8 @@ artifacts/
 
 输入：
 
-- App 名称 / 商店链接 / 安装包 / 截图 / 录屏（**一个平台即可**；有 PRD 时可选）
+- 目标 App 名称 / 商店链接 / 安装包 / 截图 / 录屏（**一个平台即可**；有 PRD 时可选）
+- 新产品 App 名称 `--app-name`（可选；未提供则从 PRD/L1/主题推导，歧义时询问）
 - 已有 PRD：`--prd <path|url>` 或 `--prd-spec <L1-code>`（可选，PRD 起点）
 - 目标平台（可由链接/PRD 推断；另一平台可选后补）
 - 技术栈（RN / Flutter / Kotlin / Java / 待定）
@@ -324,7 +328,7 @@ artifacts/
    ```
    - 可用：`agent_routing.stage_2_3=codex`、`codex_available=true`。
    - 未安装：自动 `stage_2_3=opencode`、`codex_fallback=true`；不阻塞。
-9. 初始化 `artifacts/`、`specs/`、`design/` 与 `workflow-state.md`；若 PRD 起点，记录 `prd_source`、`prd_hash`、`prd_mode=intake`。
+9. 初始化 `artifacts/`、`specs/`、`design/` 与 `workflow-state.md`；记录 `app_name`（新产品名）与目标 App；若 PRD 起点，记录 `prd_source`、`prd_hash`、`prd_mode=intake`。
 10. 确认合规边界：只分析公开可观察行为，不绕过付费/登录/DRM。
 
 产出：`00-intake.md`、`schedule.md`、`workflow-state.md`、spec-manager 初始化状态。
@@ -332,6 +336,7 @@ artifacts/
 G0 门禁：
 
 - [ ] App 来源或 PRD 来源已明确（二者至少有其一）
+- [ ] 新产品 `app_name` 已记录，或在阶段 2 明确推导规则
 - [ ] 若提供 PRD，已复制/记录来源与 SHA256，起点阶段已确定
 - [ ] 合规边界已确认
 - [ ] `schedule.md` 已生成，包含并行工作流与关键路径
@@ -419,8 +424,8 @@ G1 门禁：
    ```
 4. **创建/更新 L1**：
    ```bash
-   spec-manager spec new L1 --topic <topic> --title "<产品名> PRD"
-   spec-manager template L1 --title "<产品名> PRD" --output .spec-manager/drafts/<topic>-L1.md
+   spec-manager spec new L1 --topic <topic> --title "<app-name> PRD"
+   spec-manager template L1 --title "<app-name> PRD" --output .spec-manager/drafts/<topic>-L1.md
    # generate: 填写主题/竞品/PRD；intake: 填入已有 PRD + gap 处理
    spec-manager spec update <L1> --content .spec-manager/drafts/<topic>-L1.md      --ai-summary "<一句话摘要>" --change-summary "initial L1 PRD"
    spec-manager spec validate <L1>
@@ -483,7 +488,7 @@ G2 门禁：
      --ai-summary "<一句话摘要>" --change-summary "initial L2 design"
    spec-manager spec validate <L2>
    ```
-3. **Codex 产出设计上下文**：写入 `specs/DESIGN.md`，包含颜色、字体、间距、圆角、组件、do/don't、平台约束；OpenCode 必须读取它。
+3. **Codex 产出设计上下文**：写入 `specs/DESIGN.md`，包含产品名 `app_name`、颜色、字体、间距、圆角、组件、do/don't、平台约束；OpenCode 必须读取它。
 4. **Codex 产出 app-icon 与 splash-screen**：
    - `design/app-icon/AppIcon-1024.png`：1024x1024、不透明、无圆角/无透明通道，品牌 mark 居中，留安全边距；不含竞品元素/文字堆叠。
    - `design/app-icon/ios/`：AppIcon.appiconset 所需尺寸。
@@ -674,9 +679,14 @@ G5 门禁：
    spec-manager task create <L3.3> --plan tasks/<topic>-L3-store-plan.json --start
    ```
 2. 提取价值主张、3 个核心收益、差异点、使用场景。
-3. 按 `app-store-prd-metadata` 要求填写：App Icon、Name、Subtitle、Promotional Text、Keywords、Category、年龄分级、发行地区、Contact email、Support/Marketing/Privacy/Terms URL、运营主体、协议版本、Description；每个字段标注当前计数/限制。
+3. 按 `app-store-prd-metadata` 要求填写：App Icon、Name（使用 `app_name`）、Subtitle、Promotional Text、Keywords、Category、年龄分级、发行地区、Contact email、Support/Marketing/Privacy/Terms URL、运营主体、协议版本、Description；每个字段标注当前计数/限制。
 4. 写 App Review Notes（≤300 words，含首分钟路径、录屏链接、demo 账号；没有就写 `[待提供]`）。
-5. 生成/更新 5 张商店截图与字幕；优先使用真实构建截图，不使用概念图。
+5. 生成/更新商店截图与字幕；优先使用真实构建截图，不使用概念图。
+   - 5 图是编辑编排约定；App Store Connect 实际接受 3–10 张/设备尺寸。
+   - 母版画布 **1320x2868**；同时导出 **1206x2622**（iPhone Dynamic Island medium tier 必填）。
+   - 如支持 iPad，补 13-inch：2064x2752 或 2048x2732。
+   - PNG/JPEG、RGB、无 alpha/透明通道；按当前 App Store Connect 规格复核，不把尺寸当成永久值。
+   - 保存 `06-store/gallery.json`，用 `app-store-prd-metadata` 的 `scripts/check_gallery.py --check-files --assets-dir ... --size 1320x2868` 校验（需要 Pillow）。
 6. 需要时产出 English Privacy Policy / Terms 草稿，并标注法务审核。
 7. ASO/合规检查：无竞品商标、无编造数据、无绝对化表述、只写已构建平台。
 8. 写对外 Release Notes 与对内 QA Notes；引用 L3.1/L3.2 证据。
@@ -701,7 +711,9 @@ G6 门禁：
 - [ ] 无竞品商标、无编造数据、无绝对化违规表述
 - [ ] 关键词与目标市场语言匹配
 - [ ] 对外/对内说明分开
-- [ ] 5 张商店截图与字幕已生成
+- [ ] 商店截图已生成：至少 1320x2868 母版 + 1206x2622 medium tier；iPad 如支持已补
+- [ ] 截图 PNG/JPEG、无 alpha，`check_gallery.py --check-files` 通过
+- [ ] `gallery.json` 与截图/字幕/PRD 一致
 - [ ] 人工审核通过
 
 ### 阶段 7：打包上传 + 真机验证 + 提测（G7，OpenCode + L3.4）
@@ -781,7 +793,7 @@ G7 门禁：
    - `artifacts/01-feature-spec` ~ `07-release` 的关键文档
    - `06-store/` 文案、截图、pages
    - `07-release/` 构建日志、设备矩阵、提测单
-   - 版本/Build/Commit/构建时间/校验值
+   - 产品名 `app_name`、版本/Build/Commit/构建时间/校验值
 3. **排除**：`.env`、`.p8`、证书/keystore、密码、Token、`node_modules/`、`.dart_tool/`、构建缓存、IPA/APK 二进制（只记录路径与 SHA256）。
 4. **产出**：
    - `artifacts/08-archive/archive-manifest.md`
@@ -821,6 +833,7 @@ G8 门禁：
 current_stage: 3
 status: awaiting_codex   # pending | in_progress | awaiting_codex | awaiting_opencode | awaiting_human | blocked | done
 platform: ios
+app_name: DramaFlow          # 新产品名称（不是被分析的目标 App）
 prd_source: none            # path | url | spec-code | none
 prd_hash: null
 prd_mode: generate          # generate | intake

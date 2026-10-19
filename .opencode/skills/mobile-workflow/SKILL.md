@@ -63,6 +63,7 @@ description: 编排移动端全栈开发工作流：支持从目标 App 功能�
 - `--reverse auto|rea|off`：是否尝试 `rea` skill；默认自动，缺少时回退公开分析。
 - `--topic <slug>`：spec-manager topic；L1/L2/L3 共用，默认由 App 名 + P0 推导。
 - `--spec-manager on|off`：默认 on；off 时回退 artifacts，不伪造 specs/tasks。
+- `--app-name <name>`：新产品/品牌名；用于 L1/L2、icon/splash、商店文案、archive；不是 `--app`。
 - `--prd <path|url>`：从已有 PRD 开始；默认从阶段 2 intake，阶段 1 可跳过。
 - `--prd-spec <L1-code>`：使用现有 spec-manager L1；confirmed 则从阶段 3 开始。
 - `--prd` 起点：阶段 1 可 skipped，阶段 2 做 L1 intake；原始 PRD 复制/哈希/缺口分析必须落盘。
@@ -74,11 +75,11 @@ description: 编排移动端全栈开发工作流：支持从目标 App 功能�
 | 阶段 | 执行 Agent | spec-manager |
 | --- | --- | --- |
 | 0-1 | OpenCode | project init + topic + handoff packet |
-| 2 主题/竞品/PRD | **Codex** | L1 |
-| 3 设计系统/5 图/icon/splash/P0 | **Codex** | L2 + `specs/DESIGN.md` + `design/` |
+| 2 主题/竞品/PRD | **Codex** | L1（标题用 app_name） |
+| 3 设计系统/5 图/icon/splash/P0 | **Codex** | L2 + `specs/DESIGN.md`（含 app_name） + `design/` |
 | 4 实现 | **OpenCode** | L3.1 + Task |
 | 5 自动化测试 | **OpenCode** | L3.2 + Task |
-| 6 App Store 元数据 | OpenCode（Codex 可选） | L3.3 + Task（优先 `app-store-prd-metadata`，fallback `app-store-listing`） |
+| 6 App Store 元数据 | OpenCode（Codex 可选） | L3.3 + Task（App Name 用 app_name；优先 `app-store-prd-metadata`，fallback `app-store-listing`） |
 | 7 发布/TestFlight | **OpenCode** | L3.4 + Task |
 | 8 归档/交接 | **OpenCode** | L3.5 + Task |
 
@@ -146,7 +147,8 @@ spec-manager task list --topic <topic>
 
 | 字段 | 说明 |
 | --- | --- |
-| App 名称/链接/安装包 | 分析对象；一个平台即可；有 PRD 时可选 |
+| 目标 App 名称/链接/安装包 | 被分析对象；一个平台即可；有 PRD 时可选 |
+| 新产品 App 名称 | `--app-name`；未提供则从 PRD/L1/主题推导，歧义时询问 |
 | 已有 PRD | `--prd` 路径/URL 或 `--prd-spec` L1 code |
 | 目标平台 | 由链接推断；iOS / Android；`both` 可选但不强制双链接 |
 | 技术栈 | RN / Flutter / Kotlin / Java / 待定 |
@@ -168,6 +170,7 @@ spec-manager task list --topic <topic>
 current_stage: 0
 status: in_progress
 platform: auto
+app_name: null              # 新产品名称，不是目标 App
 prd_source: none
 prd_hash: null
 prd_mode: generate
@@ -328,6 +331,15 @@ L2 confirmed 后，OpenCode 接手：
 5. `task create <L3.1> --plan ... --start`
 6. 实现、`task step`、`task verify`、`task complete`
 
+## 阶段 6 执行要点
+
+- 优先加载 `app-store-prd-metadata`；不可用自动回退 `app-store-listing`，标记 `skill_fallback`。
+- 商店截图 5 图是编辑约定；App Store Connect 接受 3–10 张/设备尺寸。
+- 母版 1320x2868，另出 1206x2622（iPhone Dynamic Island medium tier）；iPad 如支持补 13-inch。
+- PNG/JPEG、RGB、无 alpha；提交前复核当前 App Store Connect 规格。
+- 保存 `06-store/gallery.json`，用 `check_gallery.py --check-files --assets-dir ... --size 1320x2868` 校验（需 Pillow）。
+- G6 签核时检查截图尺寸/透明度/字幕/PRD metadata 一致性。
+
 ## 人工签核点
 
 ### G2：主题 + PRD
@@ -409,6 +421,7 @@ L2 confirmed 后，OpenCode 接手：
 | 缺当前阶段必需输入 | 状态 `blocked`，列缺失项，等用户 |
 | PRD 文件不存在/无法读取 | 状态 `blocked`；PDF/DOCX 要求导出 Markdown，不猜测内容 |
 | PRD 缺章节/自相矛盾 | 写入 `prd-intake.md` gap/冲突；向用户确认，不擅自补写范围 |
+| 未提供 `--app-name` 且名称歧义 | 先问用户；PRD/L1 有明确名称则沿用，不擅自改名 |
 | 缺第二平台链接/安装包 | 不阻塞；按已有平台继续，另一平台标记可选后补 |
 | 缺开发者账号/签名/TF 权限 | 不阻塞阶段 0-6；阶段 7 再收集 |
 | 缺真实数据 API | 不阻塞；使用本地 mock，Repository 接口预留 |

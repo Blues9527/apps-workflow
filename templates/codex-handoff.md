@@ -9,6 +9,7 @@
 
 | 项目 | 内容 |
 | --- | --- |
+| 新产品名称 | <app-name> |
 | 目标 App |  |
 | 平台 / 技术栈 |  |
 | 目标市场 |  |
@@ -32,8 +33,8 @@ spec-manager decision list --topic <topic>
 创建并填写：
 
 ```bash
-spec-manager spec new L1 --topic <topic> --title "<产品名> PRD"
-spec-manager template L1 --title "<产品名> PRD" --output .spec-manager/drafts/<topic>-L1.md
+spec-manager spec new L1 --topic <topic> --title "<app-name> PRD"
+spec-manager template L1 --title "<app-name> PRD" --output .spec-manager/drafts/<topic>-L1.md
 # 填写主题候选/评分、竞品矩阵、PRD、P0 5 屏草案、mock 数据、验收标准
 spec-manager spec update <L1> --content .spec-manager/drafts/<topic>-L1.md \
   --ai-summary "<summary>" --change-summary "initial L1 PRD"

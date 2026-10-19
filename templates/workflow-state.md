@@ -8,6 +8,7 @@
 current_stage: 0
 status: in_progress   # pending | in_progress | awaiting_codex | awaiting_opencode | awaiting_human | blocked | done
 platform: auto
+app_name: null              # 新产品名称，不是目标 App
 prd_source: none            # path | url | spec-code | none
 prd_hash: null
 prd_mode: generate          # generate | intake

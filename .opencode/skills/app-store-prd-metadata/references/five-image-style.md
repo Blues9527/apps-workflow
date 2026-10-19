@@ -17,8 +17,12 @@ Use HTML/CSS, a design tool, or an image compositor. Do not let the model redraw
 
 ## Canvas and delivery
 
-- Produce five individual portrait RGB PNGs at 1290 × 2796 px, in upload order `01`–`05`.
-- Export the current App Store Connect sizes from the same layout; do not redesign per size.
+- Produce five individual portrait RGB PNGs, in upload order `01`–`05`, with no alpha channel or transparency.
+- Use **1320 × 2868** as the master canvas (current large-display iPhone). As of October 2026, App Store Connect also accepts **1260 × 2736** (iPhone Air) and **1290 × 2796** (iPhone 14/15 Pro Max, iPhone 16 Plus) for the large-display tier.
+- App Store Connect currently requires at least one “iPhone with Dynamic Island (medium display)” screenshot at **1179 × 2556** or **1206 × 2622**. Export the same five images at 1206 × 2622 as well; do not redesign per size.
+- If the app supports iPad, the 13-inch tier is required at **2064 × 2752** or **2048 × 2732**.
+- Five is this set's editorial convention. App Store Connect accepts 3–10 screenshots per device size.
+- Re-check the live screenshot specifications at submission time. Export the sizes that are required then; never treat these numbers as permanent.
 - Keep a separate overview sheet for the PRD/review. The reference overview is a wide sheet with the title `[App] / [Version] / App Store five-image set`, five thumbnails in a row, and labels below. Do not upload the overview as one of the five App Store images.
 - Keep the screenshot source files, the five finished images, the overview, the copy, and the gallery manifest together.
 
@@ -28,7 +32,7 @@ Use these proportions as starting values; keep them consistent across all five i
 
 | Element | Placement |
 |---|---|
-| Brand lockup | top left, roughly 72–80 px from each edge; logo mark + wordmark on one line |
+| Brand lockup | top left, roughly 74–82 px from each edge; logo mark + wordmark on one line |
 | Divider | thin horizontal rule below the brand row, with a small accent segment |
 | Eyebrow | uppercase, wide tracking, directly below the divider |
 | Headline | large serif display, two lines, first line roman, second line italic accent |
@@ -37,17 +41,19 @@ Use these proportions as starting values; keep them consistent across all five i
 | Device | one large portrait device mockup with a real screenshot, centered in the lower two-thirds |
 | Footer | one small centered line near the bottom edge |
 
-Approximate 1290 × 2796 layout:
+Approximate 1320 × 2868 layout:
 
-- side margin: 72–80 px
-- brand row: y 80–150
-- divider: y 190
-- eyebrow: y 250
-- headline block: y 320–560
-- body block: y 600–690
-- accent rule and slide number: y 760–780
-- device top: y 820; device width: about 70–72% of canvas
-- footer: y 2710–2740
+- side margin: 74–82 px
+- brand row: y 82–154
+- divider: y 195
+- eyebrow: y 257
+- headline block: y 328–575
+- body block: y 616–708
+- accent rule and slide number: y 780–800
+- device top: y 841; device width: about 70–72% of canvas
+- footer: y 2780–2811
+
+These are proportions, not fixed pixels. When rendering 1290 × 2796, 1206 × 2622, or another accepted size, scale every value by the canvas height so the grid stays identical.
 
 The device may overlap the lower copy zone slightly, but never clip the headline or supporting copy. Keep the screenshot undistorted and the status bar readable.
 
@@ -62,7 +68,7 @@ The device may overlap the lower copy zone slightly, but never clip the headline
 - Body: roughly 36–40 px with 1.3–1.4 line-height.
 - Footer: roughly 20–22 px.
 
-Keep each headline to two lines and each body block to two lines. If the copy does not fit, shorten it; do not reduce the type until it becomes unreadable at thumbnail size.
+Keep each headline to two lines and each body block to two lines. If the copy does not fit, shorten it; do not reduce the type until it becomes unreadable at thumbnail size. The values above are for the 1320 × 2868 master; scale them proportionally for other accepted sizes.
 
 ## Color
 
@@ -142,6 +148,7 @@ The corresponding manifest fields are:
   "ink": "#F7F4ED",
   "accent": "#D7EA8E",
   "footer": "A little less between you.",
+  "size": "1320x2868",
   "artwork": "v1.2/01-chats.png"
 }
 ```
@@ -155,5 +162,6 @@ The corresponding manifest fields are:
 - The device frame, screenshot, and status bar look coherent.
 - Text remains readable at App Store thumbnail size.
 - Background colors alternate with a deliberate rhythm and maintain contrast.
+- Every file matches an accepted App Store Connect size for its device tier, including the required medium-display tier, and has no alpha channel.
 - The overview sheet is clearly a review artifact, not a sixth upload.
 - The image order matches the PRD gallery table, metadata, and screenshot evidence.

@@ -2,7 +2,7 @@
 
 > 版本: v0.1
 > 日期: YYYY-MM-DD
-> 产品:
+> 产品: <app-name>
 > 版本/Build:
 > Commit:
 > spec topic:

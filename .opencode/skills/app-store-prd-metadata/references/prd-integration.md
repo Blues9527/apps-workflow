@@ -31,3 +31,4 @@ Apply these rules when adding metadata and review Notes to an App Store PRD:
 - Keep the image order, gallery copy, App Store description, and screenshot evidence in one manifest so they cannot drift apart.
 - Keep the overview sheet in the PRD for review; upload only the five individual portrait images to App Store Connect.
 - At submission readiness, verify screenshot sizes and counts against current App Store Connect requirements instead of relying on stale values.
+- As of October 2026, iPhone submissions require a Dynamic Island (medium display) screenshot at 1179 × 2556 or 1206 × 2622. Large-display masters are accepted at 1260 × 2736, 1290 × 2796, or 1320 × 2868. Export flattened RGB PNG/JPEG with no alpha channel; iPad 13-inch requires 2064 × 2752 or 2048 × 2732.

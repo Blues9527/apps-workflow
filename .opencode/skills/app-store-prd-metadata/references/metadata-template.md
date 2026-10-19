@@ -60,7 +60,7 @@ Thank you,
 
 ## 3. App Store 五图
 
-Use five individual portrait images in upload order, plus one overview sheet for the PRD. Keep the same layout grid across all five images.
+Use five individual portrait images in upload order, plus one overview sheet for the PRD. Keep the same layout grid across all five images. Render at 1320 × 2868 and again at 1206 × 2622 for the required medium-display tier; export flattened RGB PNG/JPEG with no alpha channel. Five is the editorial convention; App Store Connect accepts 3–10 screenshots per device size.
 
 | # | Story beat | Screen / source | Eyebrow | Headline (2 lines) | Supporting copy (2 lines) | Footer | Background | Status |
 |---|---|---|---|---|---|---|---|---|

@@ -4,6 +4,7 @@
 > 日期: YYYY-MM-DD
 > 作者: <Agent/人>
 > 状态: draft
+> 产品名称: <app-name>
 > 关联: artifacts/01-feature-spec/
 > spec-manager: <topic>-L1（源；本文件为可读副本）
 > PRD 来源: source-prd.md（intake）/ 生成（generate）

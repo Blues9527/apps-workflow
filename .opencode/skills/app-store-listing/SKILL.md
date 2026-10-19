@@ -12,6 +12,7 @@ description: 基于 confirmed L2 与实现证据，在 spec-manager L3.3 中产�
 - `02-prd/prd.md`：价值主张、目标用户、P0 功能
 - `01-feature-spec/`：真实功能与限制
 - `03-design/screens/`：5 屏截图
+- 新产品 `app_name`（不是被分析的目标 App）
 - 目标市场、语言、竞品关键词（可选）
 - 目标平台（单端即可；iOS 链接就只写 App Store）
 - 版本号、Build 号、本次变更

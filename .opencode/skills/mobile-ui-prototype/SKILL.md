@@ -9,7 +9,7 @@ description: 由 Codex 从 confirmed L1 产出素材需求清单、design tokens
 
 ## 输入
 
-- confirmed L1（spec-manager，源）
+- confirmed L1（spec-manager，源；含新产品 `app_name`）
 - `artifacts/02-prd/prd.md`（P0 草案与验收标准，L1 阅读副本）
 - `artifacts/02-prd/theme.md`（基于目标 App 的二创主题、视觉关键词）
 - `artifacts/01-feature-spec/screens.md`（目标 App 的页面与状态）

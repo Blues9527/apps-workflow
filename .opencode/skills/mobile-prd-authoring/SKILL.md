@@ -10,7 +10,7 @@ description: 由 Codex 基于目标 App 的功能知识库产出二创/优化主
 ## 输入
 
 - `artifacts/01-feature-spec/` 全部文件
-- `artifacts/00-intake.md`：目标 App、目标市场、平台、时间、团队
+- `artifacts/00-intake.md`：目标 App、新产品 `app_name`、目标市场、平台、时间、团队
 - 目标 App 的公开截图/录屏：用于保持品类与核心闭环
 - 商业目标：订阅、广告、交易、留存、品牌
 - 约束：预算、合规、已有技术栈、不可变范围
@@ -31,8 +31,8 @@ spec-manager decision list --topic <topic>
 创建 L1：
 
 ```bash
-spec-manager spec new L1 --topic <topic> --title "<产品名> PRD"
-spec-manager template L1 --title "<产品名> PRD" --output .spec-manager/drafts/<topic>-L1.md
+spec-manager spec new L1 --topic <topic> --title "<app-name> PRD"
+spec-manager template L1 --title "<app-name> PRD" --output .spec-manager/drafts/<topic>-L1.md
 # 填写主题候选、评分、竞品矩阵、PRD、P0 5 屏草案、mock 数据、验收标准
 spec-manager spec update <L1> --content .spec-manager/drafts/<topic>-L1.md   --ai-summary "<一句话摘要>" --change-summary "initial L1 PRD"
 spec-manager spec validate <L1>
@@ -44,6 +44,7 @@ spec-manager spec validate <L1>
 - L1 未 confirmed 不写 L2；Codex 不写实现代码。
 - 人类确认后执行 `spec-manager approve <L1>`。
 - 若 Codex 不可用，自动由 OpenCode 按同一流程创建 L1，并标记 `codex fallback`。
+- `app_name` 是新产品名，不是被分析的目标 App；未提供时从 PRD/L1/主题推导，歧义时询问。
 
 ## PRD Intake 模式（`--prd` / `--prd-spec`）
 

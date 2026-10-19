@@ -10,7 +10,8 @@
 | --- | --- |
 | 项目名 |  |
 | 起点 | App 分析 / 已有 PRD |
-| App 名称 | 有 PRD 时可选 |
+| 目标 App 名称 | 有 PRD 时可选 |
+| 新产品 App 名称 | `--app-name`；未提供则从 PRD/L1/主题推导 |
 | 来源链接/安装包 | 一个平台即可；有 PRD 时可选 |
 | PRD 来源 | path / URL / spec-manager L1 code |
 | PRD SHA256 |  |

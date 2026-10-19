@@ -61,7 +61,7 @@ Only list features, tabs, purchases, or AI behavior that work in the submitted b
 
 ## 3. Five-image App Store set
 
-Add `3. App Store 五图` after the review Notes whenever the PRD includes submission assets or screenshot planning. Record five individual portrait images plus one overview sheet for the PRD. Use `references/five-image-style.md` for the full style system and `references/metadata-template.md` for the planning table.
+Add `3. App Store 五图` after the review Notes whenever the PRD includes submission assets or screenshot planning. Record five individual portrait images plus one overview sheet for the PRD. Five is this skill's editorial convention: App Store Connect accepts 3–10 screenshots per device size. Use `references/five-image-style.md` for the full style system and `references/metadata-template.md` for the planning table.
 
 The set uses one shared editorial wrapper, not five unrelated posters:
 
@@ -72,7 +72,17 @@ The set uses one shared editorial wrapper, not five unrelated posters:
 5. A short accent rule, slide number, and a large device mockup containing a real app screenshot.
 6. A small footer line that closes the story.
 
-Keep the layout grid, margins, type scale, and device treatment identical across all five images. Vary the background color and screenshot, not the structure. The reference implementation uses `Instrument Serif` for headlines, a restrained editorial palette, and 1290 × 2796 RGB PNG masters in upload order.
+Keep the layout grid, margins, type scale, and device treatment identical across all five images. Vary the background color and screenshot, not the structure. The reference implementation uses `Instrument Serif` for headlines, a restrained editorial palette, and 1320 × 2868 RGB PNG masters (no alpha channel or transparency) in upload order.
+
+### Screenshot sizes
+
+Never treat one pixel size as permanent. Check the App Store Connect screenshot specifications at submission time and export the same layout at the sizes that are currently required. As of October 2026:
+
+- Required iPhone tier: “iPhone with Dynamic Island (medium display)” — at least one screenshot at 1179 × 2556 or 1206 × 2622.
+- “iPhone with Dynamic Island (large display)” is accepted at 1260 × 2736 (iPhone Air), 1290 × 2796 (iPhone 14/15 Pro Max, iPhone 16 Plus), or 1320 × 2868 (iPhone 16 Pro Max and later). Use 1320 × 2868 as the master canvas.
+- iPad 13-inch is required when the app supports iPad: 2064 × 2752 or 2048 × 2732.
+- Portrait or landscape is accepted; this set is portrait. Images must be PNG or JPEG with no alpha channel or transparency.
+- Export the five images at 1320 × 2868 and again at 1206 × 2622 so the required medium tier is covered. Do not redesign per size.
 
 ### Selection rules
 
@@ -113,6 +123,7 @@ Before finishing, check that the table and Notes agree with the rest of the PRD:
 - The listing copy, screenshots, legal/support surfaces, and review Notes describe the same build.
 - The review path demonstrates the signature action and its visible consequence within the first minute.
 - The five images use real screens from the same build, follow one shared layout system, and match the PRD's gallery plan.
+- Screenshot files match the currently required App Store Connect tiers, including the iPhone medium display, and are flattened RGB with no alpha channel.
 - Demo credentials, support links, privacy policy, terms, and purchase paths work in the submitted build.
 - Privacy Policy and Terms describe the same data flows, SDKs, monetization, age gate, and features as the submitted build.
 - The agreement version, contact email, Privacy Policy URL, and Terms URL are consistent across the PRD and both legal documents.
@@ -136,8 +147,11 @@ When a gallery manifest exists, validate the five-image plan too:
 
 ```bash
 python3 scripts/check_gallery.py gallery.json --pretty
+python3 scripts/check_gallery.py gallery.json --pretty --check-files --assets-dir ./screenshots --size 1320x2868
 ```
 
-The manifest is either an array of five image objects or an object with an `images` array. Each object uses `slug`, `feature`, `title` (two strings), `body` (two strings), `src`, `bg`, `ink`, `accent`, `footer`, and optionally `artwork`. The script checks count, order, uniqueness, required fields, two-line copy, and hex colors.
+The manifest is either an array of five image objects or an object with an `images` array. Each object uses `slug`, `feature`, `title` (two strings), `body` (two strings), `src`, `bg`, `ink`, `accent`, `footer`, and optionally `artwork` and `size` (`"1320x2868"`). The script checks count, order, uniqueness, required fields, two-line copy, and hex colors.
+
+Add `--check-files` to verify the actual raster files: existence, PNG/JPEG format, no alpha channel or transparency, and exact dimensions. Resolve relative `src` paths with `--assets-dir`; a per-image `size` overrides the global `--size`. File checking requires Pillow (`python3 -m pip install Pillow`).
 
 For legal drafts, run the manual QA checklist in `references/privacy-terms.md` before handing the draft to legal.
