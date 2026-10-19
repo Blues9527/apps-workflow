@@ -110,7 +110,8 @@ work-flow/
 │       ├── mobile-ui-prototype/
 │       ├── mobile-app-implementation/
 │       ├── mobile-e2e-testing/
-│       ├── app-store-listing/
+│       ├── app-store-prd-metadata/
+│       ├── app-store-listing/          # fallback
 │       ├── mobile-testflight-release/
 │       └── mobile-release-archive/
 └── templates/                      # 可直接复制到 artifacts/ 的模板
@@ -150,7 +151,7 @@ OpenCode 阶段 0-1
 | 3 设计系统/5 图/icon/splash/P0 | **Codex** | L2 + `specs/DESIGN.md` + `design/` |
 | 4 实现 | **OpenCode** | L3.1 + Agent Task |
 | 5 自动化测试 | **OpenCode** | L3.2 + Agent Task |
-| 6 商店文案 | OpenCode（Codex 可选） | L3.3 + Task |
+| 6 App Store 元数据 | OpenCode（Codex 可选） | L3.3 + Task（优先 `app-store-prd-metadata`，fallback `app-store-listing`） |
 | 7 发布/TestFlight | **OpenCode** | L3.4 + Task |
 | 8 归档/交接 | **OpenCode** | L3.5 + Task |
 
@@ -286,6 +287,7 @@ spec-manager project doctor
 - **Codex 分工**：阶段 2/3 默认交给 Codex 写 L1/L2，写完停下等人工确认；未安装 Codex 自动降级 OpenCode。
 - **OpenCode 分工**：阶段 4-8 先写 L3 并冻结，再创建 Agent Task 写代码/测试/文案/发布/归档。
 - **图标/启动图**：阶段 3 同时产出 app-icon 与 splash；阶段 4 接入，阶段 7 验证。
+- **商店元数据**：阶段 6 优先 `app-store-prd-metadata`；不可用自动回退 `app-store-listing`，标记 `skill_fallback`。
 - **归档**：阶段 8 生成 manifest/checksums/release summary，G8 通过才算结束。
 - **spec-manager 真相**：L1/L2/L3/Task/evidence 以 spec-manager 为准；不伪造、不跳过。
 
@@ -312,7 +314,7 @@ Codex 未安装时自动降级 OpenCode 执行阶段 2/3（`codex_fallback=true`
 | 3 素材/5 图/icon/splash | **Codex** | `L2` + `specs/DESIGN.md` + `design/` | G3 |
 | 4 框架/填充 | **OpenCode** | `L3.1` + Task + 可运行 App | G4 |
 | 5 自动化测试 | **OpenCode** | `L3.2` + Task + 脚本/报告 | G5 |
-| 6 商店文案 | OpenCode（Codex 可选） | `L3.3` + `listing.md`、`release-notes.md` | G6 |
+| 6 App Store 元数据 | OpenCode（Codex 可选） | `L3.3` + PRD metadata/`listing.md`/`release-notes.md`（优先 `app-store-prd-metadata`，fallback `app-store-listing`） | G6 |
 | 7 打包提测 | **OpenCode** | `L3.4` + Release 包、设备矩阵、提测单 | G7 |
 | 8 归档 | **OpenCode** | `L3.5` + archive manifest/checksums/release summary | G8 |
 
@@ -336,6 +338,7 @@ Codex 未安装时自动降级 OpenCode 执行阶段 2/3（`codex_fallback=true`
 - Agent: OpenCode（实现/编排）+ Codex（L1 PRD/L2 设计）
 - 协作: spec-manager（L1/L2/L3/Agent Task/Decision/Evidence）
 - 模型: Claude / GPT / DeepSeek / GLM
+- 商店元数据: `app-store-prd-metadata`（fallback `app-store-listing`）
 - MCP: Stitch（已支持）、Figma、Lark
 - UI: Stitch、GPT、doubao、awwwards（仅参考）
 - 技术栈: React Native、Flutter、Kotlin、Java

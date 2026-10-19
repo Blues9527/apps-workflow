@@ -39,7 +39,7 @@ description: 编排移动端全栈开发工作流：支持从目标 App 功能�
 14. **排期自适应**：按范围、估算与并行度自动修正截止日期；不可行时给缩范围或延期方案。
 15. **逆向可选**：需要更深逆向时，若环境提供 `rea` skill 且用户授权，可加载；否则回退公开行为分析。
 16. **spec-manager 是共享真相**：L1/L2/L3、decisions、tasks、verification evidence 以 spec-manager 为准；`artifacts/` 只做证据与阅读副本。
-17. **Agent 路由**：阶段 2/3 由 Codex 写 L1/L2；阶段 4/5 由 OpenCode 写 L3/Task 并写代码；阶段 6/7 由 OpenCode 执行，Codex 可代写文案。
+17. **Agent 路由**：阶段 2/3 由 Codex 写 L1/L2；阶段 4/5 由 OpenCode 写 L3/Task 并写代码；阶段 6 优先 `app-store-prd-metadata`（fallback `app-store-listing`）；阶段 7/8 由 OpenCode 执行。
 18. **顺序硬约束**：L1 未 confirmed 不写 L2；L2 未 confirmed 不写 L3；L3 未 frozen 不写代码。
 19. **审批**：L1/L2/L3 的 `spec-manager approve` 只能在人明确确认后执行；禁止用 `--auto-confirm` 代替人工门禁。
 20. **任务证据**：每个 Task 必须有 steps 与 verification evidence；禁止 `--skip-verification` / `--skip-verify` 掩盖失败。
@@ -78,7 +78,7 @@ description: 编排移动端全栈开发工作流：支持从目标 App 功能�
 | 3 设计系统/5 图/icon/splash/P0 | **Codex** | L2 + `specs/DESIGN.md` + `design/` |
 | 4 实现 | **OpenCode** | L3.1 + Task |
 | 5 自动化测试 | **OpenCode** | L3.2 + Task |
-| 6 商店文案 | OpenCode（Codex 可选） | L3.3 + Task |
+| 6 App Store 元数据 | OpenCode（Codex 可选） | L3.3 + Task（优先 `app-store-prd-metadata`，fallback `app-store-listing`） |
 | 7 发布/TestFlight | **OpenCode** | L3.4 + Task |
 | 8 归档/交接 | **OpenCode** | L3.5 + Task |
 
@@ -117,7 +117,7 @@ Handoff 规则：
 2. Codex 用 `spec-manager spec new L1` 写 L1，`validate` 后停止；人确认后 `spec-manager approve <L1>`。
 3. Codex 仅在 L1 confirmed 后创建 L2（`--parent <L1>`），产出 `specs/DESIGN.md` 与 `design/` 5 图；`validate` 后停止；人确认后 `spec-manager approve <L2>`。
 4. OpenCode 状态改 `awaiting_opencode`，读 confirmed L1/L2，创建 L3.1/L3.2（`--parent <L2>`），人确认后 `approve` 冻结，再 `task create ... --start`。
-5. 阶段 6/7 创建 L3.3/L3.4，Task 完成后用 `task verify` 记录证据；阶段 8 创建 L3.5 归档。
+5. 阶段 6 优先加载 `app-store-prd-metadata`，不可用自动降级 `app-store-listing` 并标记 `skill_fallback`；阶段 6/7 创建 L3.3/L3.4，Task 完成后用 `task verify` 记录证据；阶段 8 创建 L3.5 归档。
 6. 任何 Agent 都不得替另一个 Agent 签核；Codex 不写实现代码，OpenCode 不改 L1/L2。
 
 ### 第 1 步：读取现状
@@ -215,7 +215,7 @@ next_action: 完成项目建档、spec-manager 初始化与排期
 2. 用 skill 工具加载对应阶段 skill。
 3. 阶段 2/3：Codex 可用则生成 handoff packet、状态 `awaiting_codex`、暂停；PRD 起点时 handoff 里写 `prd_mode=intake`；Codex 不可用则自动 `codex_fallback`，由 OpenCode 直接执行 L1/L2。
 4. 阶段 4/5：读取 confirmed L1/L2，创建/冻结 L3，创建 Task，再写代码/测试。
-5. 阶段 6/7：创建 L3.3/L3.4，完成商店文案与 Release/TestFlight。
+5. 阶段 6/7：阶段 6 优先 `app-store-prd-metadata`（fallback `app-store-listing`）；创建 L3.3/L3.4，完成 App Store 元数据与 Release/TestFlight。
 6. 阶段 8：创建 L3.5，归档 specs/design/store/release，生成 manifest/checksums/release summary。
 7. 执行该 skill 的流程，产物写入固定路径。
 8. 运行门禁自检，把「通过/失败/缺证据」逐项写清楚；同时检查 `spec-manager flow status`。
@@ -232,7 +232,7 @@ next_action: 完成项目建档、spec-manager 初始化与排期
 | 3 素材 + 5 图 + icon/splash | **Codex** | `mobile-ui-prototype` | L2 + DESIGN.md |
 | 4 框架 + 功能填充 | **OpenCode** | `mobile-app-implementation` | L3.1 + Task |
 | 5 自动化测试 | **OpenCode** | `mobile-e2e-testing` | L3.2 + Task |
-| 6 商店文案 | OpenCode（Codex 可选） | `app-store-listing` | L3.3 + Task |
+| 6 App Store 元数据 | OpenCode（Codex 可选） | `app-store-prd-metadata`（fallback `app-store-listing`） | L3.3 + Task |
 | 7 打包上传 + 真机 + 提测 | **OpenCode** | `mobile-testflight-release` | L3.4 + Task |
 | 8 归档 | **OpenCode** | `mobile-release-archive` | L3.5 + Task |
 
@@ -393,6 +393,7 @@ L2 confirmed 后，OpenCode 接手：
 
 - **spec-manager**：共享规格/任务/决策/证据。阶段 2/3 写 L1/L2，阶段 4/5 写 L3/Task。
 - **Codex CLI**：执行阶段 2/3（L1/L2）。默认 handoff 暂停等待，用户同意时可用 `codex exec` 跑 handoff packet。
+- **app-store-prd-metadata**：阶段 6 首选，更新 PRD 的 App Store 元数据/Review Notes/五图/Privacy-Terms；不可用时回退 `app-store-listing`。
 - **Stitch MCP**：阶段 3 创建项目、设计系统、生成/编辑/变体屏幕。工具名以 `stitch_` 开头。
 - **Figma MCP**：有现成设计稿时读取 tokens、组件、间距，减少重复设计。
 - **Lark MCP**：需要跨团队评审时，把 PRD、素材清单、缺陷单同步为文档/表格；本地仍保留 `artifacts/` 为唯一真相。
@@ -418,6 +419,7 @@ L2 confirmed 后，OpenCode 接手：
 | Task 缺 evidence | 不允许 `task complete`；补 verification 或记录真实失败 |
 | spec-manager 不可用 | 回退 artifacts 工件流，状态标记 `spec-manager fallback`，不伪造 specs/tasks |
 | Codex 不可用 | 自动降级：`stage_2_3=opencode`、`codex_fallback=true`；OpenCode 按 L1/L2 模板执行，仍要人工确认与 L3 冻结 |
+| `app-store-prd-metadata` 不可用 | 自动降级 `app-store-listing`，标记 `skill_fallback=app-store-listing`；不伪造 PRD metadata |
 | 工具不可用 | 按 WORKFLOW.md §9 降级：L1 换工具/模型 → L2 本地 fallback → L3 手工；标记 `fallback`/`unverified`，记录并复核 |
 | `rea` skill 不可用 | 回退公开行为分析，不伪造逆向结果 |
 | 测试发现阻断问题 | 回阶段 4 修复，重跑失败用例 + P0 冒烟 + 全量门禁 |

@@ -87,7 +87,7 @@ $ARGUMENTS
 | 3 设计系统/5 图/icon/splash/P0 | **Codex** | spec-manager L2 + `specs/DESIGN.md` + `design/` |
 | 4 实现 | **OpenCode** | L3.1 + Agent Task + 代码 |
 | 5 自动化测试 | **OpenCode** | L3.2 + Agent Task + 测试证据 |
-| 6 商店文案 | OpenCode（Codex 可选） | L3.3 + Task |
+| 6 App Store 元数据 | OpenCode（Codex 可选） | L3.3 + Task（优先 `app-store-prd-metadata`，fallback `app-store-listing`） |
 | 7 发布/TestFlight | **OpenCode** | L3.4 + Task |
 | 8 归档/交接 | **OpenCode** | L3.5 + Task |
 
@@ -252,13 +252,15 @@ Agent 只会询问当前阶段真正缺失的信息；平台从链接推断，�
 - `--dry-run` 只读，不创建目录、不写工件、不改状态。
 - 每个阶段加载对应 skill，产物写入 `--artifacts` 指定目录（默认 `artifacts/`）。
 - 每个阶段结束检查门禁，未通过不进入下一阶段。
-- G2、G3、G7 停下来等人工确认，不要自己签核。
+- G2、G3、G4（L3 冻结）、G7、G8 停下来等人工确认，不要自己签核。
 - 主题必须基于目标 App 二创/优化；有 PRD 时以 PRD 为准，不擅自改写范围。P0 以 5 图为最终边界。
 - `--prd` 起点：保存原始 PRD/hash，阶段 2 做 L1 intake；无 `--app` 时阶段 1 跳过，不伪造功能清单。
 - `--prd-spec` 已 confirmed 时直接进阶段 3；draft 时先 review L1。
 - 阶段 2/3 默认交给 Codex；先准备 handoff packet 并暂停，不要自己写 L1/L2。
 - 未安装 Codex 或 `--codex off` 时，自动降级 OpenCode 执行 L1/L2，标记 `codex_fallback`。
 - 阶段 4/5 由 OpenCode 执行；先写 L3 并冻结，再创建 Task 写代码。
+- 阶段 6 优先 `app-store-prd-metadata`；不可用自动回退 `app-store-listing`，标记 `skill_fallback`。
+- 阶段 8 归档后工作流才算结束。
 - spec-manager 是 L1/L2/L3/Task/evidence 的共享真相；不伪造 specs/tasks/evidence。
 - `--spec-manager on` 时先 `project init`/`agents install`/`doctor`；`off` 时回退 artifacts 并标记 `spec-manager fallback`。
 - `--topic` 会贯穿 L1/L2/L3/Task；未指定时由 App 名 + P0 推导。

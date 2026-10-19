@@ -49,7 +49,7 @@
 | 产品/设计 Agent | L1 PRD、竞品、L2 设计系统、5 图 | **Codex** `mobile-prd-authoring` / `mobile-ui-prototype` |
 | 实现 Agent | L3.1 实现、框架、P0 填充、自测 | **OpenCode** `mobile-app-implementation` |
 | 测试 Agent | L3.2 自动化主流程、缺陷分级、回归 | **OpenCode** `mobile-e2e-testing` |
-| 发布 Agent | L3.3 商店文案、L3.4 打包/真机/提测、L3.5 归档 | **OpenCode** `app-store-listing` / `mobile-testflight-release` / `mobile-release-archive` |
+| 发布 Agent | L3.3 商店元数据、L3.4 打包/真机/提测、L3.5 归档 | **OpenCode** `app-store-prd-metadata`（fallback `app-store-listing`） / `mobile-testflight-release` / `mobile-release-archive` |
 | 共享状态 | specs、decisions、tasks、verification evidence | **spec-manager** |
 
 一个人可以承担多个角色，但门禁签核不能由执行同一动作的 Agent 自己伪造。Codex 不能给自己写 L1/L2 签核，OpenCode 不能在 L3 冻结前写代码。
@@ -169,7 +169,7 @@ spec-manager assist acceptance <taskId>
 | 3 | 素材 + 5 图 + P0 锁定 | **Codex** | `mobile-ui-prototype` | **L2 Design** | 设计系统、5 屏、`specs/DESIGN.md`、P0 锁定 | G3 |
 | 4 | 框架 + P0 实现 | **OpenCode** | `mobile-app-implementation` | **L3.1 + Task** | 可运行 App、mock 数据层 | G4 |
 | 5 | 自动化主流程测试 | **OpenCode** | `mobile-e2e-testing` | **L3.2 + Task** | 测试脚本、报告、缺陷单 | G5 |
-| 6 | 商店文案 + Release Notes | OpenCode（Codex 可选） | `app-store-listing` | **L3.3 Store + Task** | `listing.md`、`release-notes.md` | G6 |
+| 6 | App Store 元数据 + Release Notes | OpenCode（Codex 可选） | `app-store-prd-metadata`（fallback `app-store-listing`） | **L3.3 Store + Task** | PRD metadata sections、`listing.md`、`release-notes.md` | G6 |
 | 7 | 打包上传 + 真机验证 + 提测 | **OpenCode** | `mobile-testflight-release` | **L3.4 Release + Task** | Release 包、设备矩阵、提测单 | G7 |
 | 8 | 归档与交接 | **OpenCode** | `mobile-release-archive` | **L3.5 Archive + Task** | 归档包、manifest、checksums、release summary | G8 |
 
@@ -651,14 +651,17 @@ G5 门禁：
 - [ ] 目标端（单端即可）通过；另一平台未构建不阻塞
 - [ ] Task verification evidence 已记录，测试报告已归档
 
-### 阶段 6：商店文案与 Release Notes（G6，OpenCode + L3.3）
+### 阶段 6：App Store 元数据与 Release Notes（G6，OpenCode + L3.3）
 
-目标：基于 L2、L3.1/L3.2 的实现证据产出可提交的商店文案；默认 OpenCode，Codex 可代写文案。人工审核后使用。
+目标：基于 L2、L3.1/L3.2 的实现证据产出可提交的 App Store 元数据；**优先使用 `app-store-prd-metadata` skill**，不可用时自动降级到 `app-store-listing`。人工审核后使用。
 
-输入：confirmed L2、L3.2 implemented、`design/screens/`、`01-feature-spec/`、目标语言、目标平台（单端即可）。
+输入：confirmed L2、L3.2 implemented、`design/screens/`、`02-prd/prd.md`、`01-feature-spec/`、目标语言、目标平台（单端即可）。
 
 动作：
 
+0. **选择 skill**：
+   - 优先加载 `app-store-prd-metadata`：更新 PRD 的 App Store 基本信息、Review Notes、五图计划、Privacy/Terms 草稿，并导出 `06-store/listing.md`、`release-notes.md`。
+   - 若该 skill 不存在/不可用：自动降级 `app-store-listing`，标记 `skill_fallback=app-store-listing`；不要伪造 PRD metadata 段落。
 1. **创建 L3.3 Store Copy**：
    ```bash
    spec-manager spec new L3 --topic <topic> --parent <L2> --title "App Store Copy" --desc store
@@ -671,23 +674,27 @@ G5 门禁：
    spec-manager task create <L3.3> --plan tasks/<topic>-L3-store-plan.json --start
    ```
 2. 提取价值主张、3 个核心收益、差异点、使用场景。
-3. 生成 3 组语气版本，选 1 组；按平台写字段（iOS 只写 App Store）。
-4. 生成 5 张商店截图（1290x2796 或平台要求尺寸）与截图字幕。
-5. ASO/合规检查：无竞品商标、无编造数据、无绝对化表述、只写已构建平台。
-6. 写对外 Release Notes 与对内 QA Notes；引用 L3.1/L3.2 证据。
-7. 人工审核；通过后：
+3. 按 `app-store-prd-metadata` 要求填写：App Icon、Name、Subtitle、Promotional Text、Keywords、Category、年龄分级、发行地区、Contact email、Support/Marketing/Privacy/Terms URL、运营主体、协议版本、Description；每个字段标注当前计数/限制。
+4. 写 App Review Notes（≤300 words，含首分钟路径、录屏链接、demo 账号；没有就写 `[待提供]`）。
+5. 生成/更新 5 张商店截图与字幕；优先使用真实构建截图，不使用概念图。
+6. 需要时产出 English Privacy Policy / Terms 草稿，并标注法务审核。
+7. ASO/合规检查：无竞品商标、无编造数据、无绝对化表述、只写已构建平台。
+8. 写对外 Release Notes 与对内 QA Notes；引用 L3.1/L3.2 证据。
+9. 人工审核；通过后：
    ```bash
    spec-manager task verify <taskId> --command "manual review" --exit-code 0 \
      --summary "copy approved" --artifacts "06-store/listing.md,06-store/screenshots/" --layer functional
    spec-manager task complete <taskId>
    ```
 
-产出：L3.3 spec、Task evidence、`06-store/listing.md`、`release-notes.md`、商店截图。
+产出：L3.3 spec、Task evidence、PRD App Store metadata 段落、`06-store/listing.md`、`release-notes.md`、商店截图、可选 Privacy/Terms 草稿。
 
 G6 门禁：
 
 - [ ] L3.3 已 `validate` 并经人工 `approve`（frozen）
 - [ ] L3.3 Agent Task 已创建并完成
+- [ ] 已尝试 `app-store-prd-metadata`；不可用时已记录 `skill_fallback=app-store-listing`
+- [ ] PRD 的 App Store 基本信息/Review Notes/五图计划已更新（首选 skill）
 - [ ] 每个字段符合对应平台字数限制
 - [ ] 只写已构建平台，未构建平台不出现声明
 - [ ] 所有功能声明可追溯到 L1/L2/L3 或截图

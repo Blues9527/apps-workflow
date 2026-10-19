@@ -1,5 +1,6 @@
-# 商店文案
+# 商店文案（Fallback）
 
+> 角色: 阶段 6 fallback；优先使用 `app-store-prd-metadata`
 > 版本: v0.1
 > 日期: YYYY-MM-DD
 > 状态: draft

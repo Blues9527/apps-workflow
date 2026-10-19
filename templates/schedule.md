@@ -45,6 +45,7 @@
 - 共享 spec-manager topic、`design/screen-map.md`、P0 锁定表与 `specs/DESIGN.md`，避免各写一套。
 - W1→W2、W2→W3 之间的 Codex handoff / L1/L2 确认要计入关键路径。
 - PRD 起点：阶段 1 可跳过；阶段 2 的 L1 intake 需保留 source/hash/gap，不缩短人工确认。
+- 阶段 6 优先 `app-store-prd-metadata`；不可用回退 `app-store-listing`，并在 task 里标记 `skill_fallback`。
 - W3 的测试脚本可在 UI 稳定前并行编写，但必须等 P0 锁定。
 - W4 的商店文案在 5 图产出后开始；构建在 G5 通过后开始。
 - 发布凭证在阶段 7 收集，不提前阻塞。
