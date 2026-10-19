@@ -8,6 +8,10 @@
 current_stage: 0
 status: in_progress   # pending | in_progress | awaiting_codex | awaiting_opencode | awaiting_human | blocked | done
 platform: auto
+prd_source: none            # path | url | spec-code | none
+prd_hash: null
+prd_mode: generate          # generate | intake
+feature_analysis: pending   # pending | done | skipped（PRD 起点可 skipped）
 spec_manager:
   project: <project>
   topic: <topic>

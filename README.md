@@ -1,6 +1,6 @@
 # 移动端全栈开发工作流 + Skills
 
-把「已上架 App 功能分析 → Codex 写 L1 PRD/L2 设计+5 图 → OpenCode 写 L3/Task 实现 → 自动化测试 → 商店文案 → TestFlight/内测提测」固化成一套由 **spec-manager** 协作、可断点续跑、带门禁、自动排期并支持多 Agent 并行的 Agent 工作流。
+把「已上架 App 功能分析 / 已有 PRD → Codex 写 L1 PRD/L2 设计+5 图 → OpenCode 写 L3/Task 实现 → 自动化测试 → 商店文案 → TestFlight/内测提测」固化成一套由 **spec-manager** 协作、可断点续跑、带门禁、自动排期并支持多 Agent 并行的 Agent 工作流。
 
 ## 安装
 
@@ -76,6 +76,24 @@ spec-manager project doctor
 用 mobile-workflow 从功能分析开始，走到 TestFlight 提测
 ```
 
+### 从已有 PRD 开始
+
+```text
+/mobile-flow --prd "./docs/prd.md" --platform ios --stack flutter --market us --topic myapp-p0
+```
+
+- 原始 PRD 会复制到 `artifacts/02-prd/source-prd.md`，并记录 SHA256。
+- 没有 `--app` 时阶段 1 可跳过；阶段 2 进入 L1 intake。
+- 生成 `prd-intake.md`，保留原始范围/需求 ID；缺失章节标 gap，不擅自补写。
+- 人工确认 L1 后进入阶段 3。
+- `--prd` 只用于阶段 2 intake；要从阶段 3 开始请先用 `--prd-spec` 指向 confirmed L1。
+
+已有 spec-manager L1：
+
+```text
+/mobile-flow --prd-spec myapp-L1 --from-stage 3
+```
+
 ## 包含内容
 
 ```text
@@ -101,6 +119,7 @@ work-flow/
     ├── schedule.md
     ├── feature-inventory.md
     ├── prd.md
+    ├── prd-intake.md
     ├── design-system.md
     ├── app-icon-splash.md
     ├── asset-manifest.md
@@ -169,6 +188,7 @@ spec-manager project doctor
 9. **自动降级**：未安装 Codex 时自动回退 OpenCode 执行阶段 2/3，标记 `codex_fallback`。
 10. **图标/启动图**：阶段 3 同时产出 app-icon 与 splash-screen，阶段 4 接入。
 11. **收尾归档**：新增阶段 8 Archive & Handoff，生成 manifest/checksums/release summary，G8 通过才算结束。
+12. **PRD 起点**：支持 `--prd`/`--prd-spec`；阶段 1 可跳过，阶段 2 做 L1 intake，保留原始 PRD/hash/gap。
 
 ## 命令参数与使用指引
 
@@ -182,7 +202,9 @@ spec-manager project doctor
 
 | 参数 | 取值 | 默认 | 说明 |
 | --- | --- | --- | --- |
-| `--app` | 商店 URL / APK/IPA 路径 / App 名 | 阶段 1 前必填 | 分析对象 |
+| `--app` | 商店 URL / APK/IPA 路径 / App 名 | 无 PRD 时必填 | 分析对象；有 PRD 时可选 |
+| `--prd` | 文件路径 / URL | 无 | 从已有 PRD 开始；默认从阶段 2 intake |
+| `--prd-spec` | 现有 L1 code | 无 | 已有 spec-manager L1；confirmed 默认从阶段 3 |
 | `--platform` | `auto` / `ios` / `android` / `both` | `auto` | 从链接推断；一个平台即可；`both` 缺少另一端时按已有平台继续 |
 | `--stack` | `auto` / `rn` / `flutter` / `kotlin` / `java` | `auto` | 有仓库时自动识别 |
 | `--market` | `cn` / `us` / `jp` / `zh-CN` / `en-US` 等 | 询问 | 目标市场与语言 |
@@ -195,7 +217,7 @@ spec-manager project doctor
 
 | 参数 | 取值 | 默认 | 说明 |
 | --- | --- | --- | --- |
-| `--from-stage` | `0`-`8` | 有状态则续跑 | 从指定阶段开始，前置门禁必须通过 |
+| `--from-stage` | `0`-`8` | 有状态续跑；`--prd` 时默认 `2` | 从指定阶段开始，前置门禁必须通过 |
 | `--only-stage` | `0`-`8` | 无 | 只跑一个阶段，适合重跑 |
 | `--resume` | 开关 | 有状态时默认 | 断点续跑 |
 | `--restart` | 开关 | 无 | 归档旧产物后从 0 开始，需确认 |
@@ -221,6 +243,10 @@ spec-manager project doctor
 ```text
 # 全流程（单端链接即可，自动排期，3 个 Agent 并行）
 /mobile-flow --app "https://apps.apple.com/..." --platform auto --stack flutter --market us --scope "基于目标 App 的核心闭环做优化" --deadline auto --parallel 3
+
+# 分别从已有 PRD / 现有 L1 开始
+/mobile-flow --prd "./docs/prd.md" --platform ios --stack flutter --market us --topic myapp-p0
+/mobile-flow --prd-spec myapp-L1 --from-stage 3
 
 # 最简启动，缺什么问什么
 /mobile-flow --app "https://play.google.com/store/apps/details?id=..."
@@ -250,6 +276,7 @@ spec-manager project doctor
 
 - **二创/优化**：主题必须基于目标 App，保持同品类与核心闭环，不转向无关产品。
 - **5 图定 P0**：P0 = 5 图展示的内容；5 图外默认 P1/P2，不进入首版。
+- **PRD 起点**：支持 `--prd`/`--prd-spec`；保留原始 PRD/hash/gap，阶段 1 可跳过，阶段 2 做 L1 intake。
 - **Mock 优先**：MVP 数据全部本地 mock，Repository 接口预留，真实 API 不作为 P0 依赖。
 - **单端足够**：提供一个平台链接/安装包即可；另一平台可选后补。
 - **凭证后置**：开发者账号、签名、TestFlight 权限在阶段 7 才收集。
@@ -280,7 +307,7 @@ Codex 未安装时自动降级 OpenCode 执行阶段 2/3（`codex_fallback=true`
 | 阶段 | 执行 Agent | 关键产出 | 人工签核 |
 | --- | --- | --- | --- |
 | 0 启动 | **OpenCode** | `00-intake.md`、`schedule.md`、`workflow-state.md`、spec-manager init（skill: `mobile-workflow`） | - |
-| 1 功能分析 | **OpenCode** | 功能清单、页面、流程、规则、术语、Codex handoff（skill: `mobile-feature-analysis`） | G1 |
+| 1 功能分析（可选） | **OpenCode** | 功能清单、页面、流程、规则、术语、Codex handoff（skill: `mobile-feature-analysis`） | G1（PRD 起点可跳过） |
 | 2 二创主题/竞品/PRD | **Codex** | `L1` + `theme.md`、`competitors.md`、`prd.md` | G2 |
 | 3 素材/5 图/icon/splash | **Codex** | `L2` + `specs/DESIGN.md` + `design/` | G3 |
 | 4 框架/填充 | **OpenCode** | `L3.1` + Task + 可运行 App | G4 |
@@ -326,6 +353,7 @@ Stitch 相关 skill 使用 `stitch_*` MCP 工具：创建项目、设计系统�
 - **Codex 可选**：未安装会自动 `codex_fallback`；如果强制 `--codex on`，需要先安装并登录 Codex CLI。
 - **门禁不可跳过**：L1/L2 未 confirmed、L3 未 frozen 不写代码；G2/G3/G4/G7/G8 需要人工签核。
 - **5 图定 P0**：P0 = 5 图展示内容；5 图外默认 P1/P2。
+- **PRD 起点**：`--prd` 时保存原始 PRD/SHA256/`prd-intake.md`，不擅自改写范围；`--prd-spec` 已 confirmed 可直接从阶段 3 开始。
 - **Mock 优先**：MVP 数据本地 mock，真实 API/CDN 不作为 P0 依赖。
 - **单端足够**：一个平台链接即可；另一平台可选后补。
 - **归档**：阶段 8 生成 archive manifest/checksums/release summary；归档中不得含密钥或大二进制。

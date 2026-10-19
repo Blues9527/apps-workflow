@@ -22,8 +22,8 @@
 | 阶段 | 估算（人日） | 可并行 | 依赖 |
 | --- | --- | --- | --- |
 | 0 建档/排期 | 0.25 | - | - |
-| 1 功能分析 | 1（公开）/ 2（rea） | 竞品研究可并行 | 0 |
-| 2 L1 PRD（Codex） | 1 | 可与参考图/设计方向并行 | 1 |
+| 1 功能分析（可选） | 1（公开）/ 2（rea） | 竞品研究可并行；PRD 起点可跳过 | 0 |
+| 2 L1 PRD（Codex） | generate 1 / intake 0.5-1 | 可与参考图/设计方向并行；intake 需 PRD 审查 | 1 或 PRD |
 | 3 L2 设计/5 图/icon/splash（Codex） | 1 | 素材生成可与屏幕设计并行；需 L1 confirmed | 2 |
 | 4 L3.1 实现（OpenCode） | 2-4 | 测试脚本可并行编写；需 L2 confirmed + L3 frozen | 3 |
 | 5 L3.2 自动化测试（OpenCode） | 1 | 文案可与测试并行；需 L3.1 implemented | 4 |
@@ -44,6 +44,7 @@
 
 - 共享 spec-manager topic、`design/screen-map.md`、P0 锁定表与 `specs/DESIGN.md`，避免各写一套。
 - W1→W2、W2→W3 之间的 Codex handoff / L1/L2 确认要计入关键路径。
+- PRD 起点：阶段 1 可跳过；阶段 2 的 L1 intake 需保留 source/hash/gap，不缩短人工确认。
 - W3 的测试脚本可在 UI 稳定前并行编写，但必须等 P0 锁定。
 - W4 的商店文案在 5 图产出后开始；构建在 G5 通过后开始。
 - 发布凭证在阶段 7 收集，不提前阻塞。

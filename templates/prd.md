@@ -6,6 +6,7 @@
 > 状态: draft
 > 关联: artifacts/01-feature-spec/
 > spec-manager: <topic>-L1（源；本文件为可读副本）
+> PRD 来源: source-prd.md（intake）/ 生成（generate）
 
 ## 1. 背景与目标
 

@@ -1,6 +1,7 @@
 # 已有项目迁移到 Codex + spec-manager
 
-> 适用: 已经用 artifacts 跑过阶段 1-3，想切换到 Codex/OpenCode + spec-manager
+> 适用: 已经用 artifacts 跑过阶段 1-3，想切换到 Codex/OpenCode + spec-manager  
+> 注意: 如果已有完整 PRD，优先使用 `/mobile-flow --prd <path>`；本文档用于没有现成 PRD、需要从 artifacts 回填的情况。
 
 ## 1. 初始化
 

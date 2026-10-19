@@ -45,6 +45,37 @@ spec-manager spec validate <L1>
 - 人类确认后执行 `spec-manager approve <L1>`。
 - 若 Codex 不可用，自动由 OpenCode 按同一流程创建 L1，并标记 `codex fallback`。
 
+## PRD Intake 模式（`--prd` / `--prd-spec`）
+
+当用户提供已有 PRD 时，不重新生成主题/竞品/PRD；把 PRD 规范化为 L1。
+
+### 输入
+
+- `--prd <path|url>`：Markdown/文本/可抓取 URL
+- `--prd-spec <L1-code>`：已有 spec-manager L1
+- PDF/DOCX：先要求用户导出 Markdown，不猜测内容
+
+### 流程
+
+1. 复制原始 PRD 到 `artifacts/02-prd/source-prd.md`，记录来源、日期、SHA256。
+2. 写 `artifacts/02-prd/prd-intake.md`：
+   - 已有章节/缺失章节/冲突
+   - 需求 ID 映射（保留原 ID；没有则生成 `R-xxx`）
+   - P0 5 屏分配草案（PRD 有则保留，没有则标 gap）
+   - 假设与待确认项
+3. 创建 L1，把 PRD 内容填入 L1 模板；保留原始措辞、范围与 ID，不擅自改写。
+4. 缺失章节/冲突只向用户确认或标 gap；不做无依据补写。
+5. `spec-manager spec validate <L1>`；停止等待人工确认。
+6. `--prd-spec` 已 confirmed：跳过创建，直接进阶段 3；draft：先 review/confirm。
+7. 人工确认后 `spec-manager approve <L1>`；导出 `02-prd/` 阅读副本。
+
+### 硬规则
+
+- 不覆盖原始 PRD。
+- 不把 PRD 没写的功能/范围写进 P0。
+- PRD 与目标 App 冲突时，以 PRD 为准并记录 decision。
+- PRD 起点下，阶段 1 可 skipped；不要伪造功能清单。
+
 ## 流程
 
 ### 第 1 步：生成创意主题
@@ -234,6 +265,7 @@ artifacts/02-prd/
 - [ ] 非功能需求有数字指标
 - [ ] 埋点、权限、隐私、异常路径已定义
 - [ ] 自洽审计无未解释冲突
+- [ ] intake 模式：`source-prd.md`、SHA256、`prd-intake.md` 已保存；未改写原始范围；需求 ID 映射完整
 - [ ] 人类明确确认 L1，且 `spec-manager approve <L1>` 已执行
 - [ ] L1 code 已写入 `workflow-state.md`
 

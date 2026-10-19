@@ -9,8 +9,12 @@
 | 字段 | 内容 |
 | --- | --- |
 | 项目名 |  |
-| App 名称 |  |
-| 来源链接/安装包 | 一个平台即可 |
+| 起点 | App 分析 / 已有 PRD |
+| App 名称 | 有 PRD 时可选 |
+| 来源链接/安装包 | 一个平台即可；有 PRD 时可选 |
+| PRD 来源 | path / URL / spec-manager L1 code |
+| PRD SHA256 |  |
+| feature_analysis | pending / done / skipped（PRD 起点可 skipped） |
 | 版本号 |  |
 | 目标平台 | 由链接推断（iOS / Android）；双端可选 |
 | 技术栈 | RN / Flutter / Kotlin / Java / 待定 |

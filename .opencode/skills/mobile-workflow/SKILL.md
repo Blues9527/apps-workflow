@@ -1,6 +1,6 @@
 ---
 name: mobile-workflow
-description: 编排移动端全栈开发工作流：OpenCode 功能分析，Codex 通过 spec-manager 产出 L1 PRD/L2 设计+5 图，OpenCode 基于冻结 L3 创建 Task 实现、测试、商店文案到 TestFlight；支持单端、自动排期与多 Agent 并行。Use when the user says 移动端全流程、Codex 写 PRD、spec-manager、从功能分析到提测、App 二创/复刻/重构、5 图定 P0、跑完整工作流、PRD 到 TestFlight、mobile app workflow，or asks to coordinate these stages.
+description: 编排移动端全栈开发工作流：支持从目标 App 功能分析或已有 PRD 起点，Codex 通过 spec-manager 产出 L1 PRD/L2 设计+5 图，OpenCode 基于冻结 L3 创建 Task 实现、测试、商店文案到 TestFlight/归档；支持单端、自动排期与多 Agent 并行。Use when the user says 移动端全流程、Codex 写 PRD、spec-manager、从功能分析到提测、App 二创/复刻/重构、5 图定 P0、跑完整工作流、PRD 到 TestFlight、mobile app workflow，or asks to coordinate these stages.
 ---
 
 # 移动端全栈工作流编排
@@ -43,6 +43,8 @@ description: 编排移动端全栈开发工作流：OpenCode 功能分析，Code
 18. **顺序硬约束**：L1 未 confirmed 不写 L2；L2 未 confirmed 不写 L3；L3 未 frozen 不写代码。
 19. **审批**：L1/L2/L3 的 `spec-manager approve` 只能在人明确确认后执行；禁止用 `--auto-confirm` 代替人工门禁。
 20. **任务证据**：每个 Task 必须有 steps 与 verification evidence；禁止 `--skip-verification` / `--skip-verify` 掩盖失败。
+21. **PRD 起点**：`--prd` 时阶段 1 可 skipped，阶段 2 进入 L1 intake；保留原始 PRD、SHA256、gap 分析，不擅自改写范围。
+22. **PRD-spec 起点**：`--prd-spec` 已 confirmed 时直接进阶段 3；draft 时先做 L1 review。
 
 ## 启动流程
 
@@ -61,6 +63,9 @@ description: 编排移动端全栈开发工作流：OpenCode 功能分析，Code
 - `--reverse auto|rea|off`：是否尝试 `rea` skill；默认自动，缺少时回退公开分析。
 - `--topic <slug>`：spec-manager topic；L1/L2/L3 共用，默认由 App 名 + P0 推导。
 - `--spec-manager on|off`：默认 on；off 时回退 artifacts，不伪造 specs/tasks。
+- `--prd <path|url>`：从已有 PRD 开始；默认从阶段 2 intake，阶段 1 可跳过。
+- `--prd-spec <L1-code>`：使用现有 spec-manager L1；confirmed 则从阶段 3 开始。
+- `--prd` 起点：阶段 1 可 skipped，阶段 2 做 L1 intake；原始 PRD 复制/哈希/缺口分析必须落盘。
 - 不接受 `--skip-gates`、`--auto-approve`、`--yes`，也不接受命令行传密钥/密码；只从环境变量或 Keychain 读取。
 - 未知参数或冲突参数：列出有效参数并停止，不要猜测。
 
@@ -121,6 +126,8 @@ Handoff 规则：
 
 - `WORKFLOW.md` 是否存在
 - `artifacts/workflow-state.md` 是否存在
+- `prd_source` / `prd_mode` / `feature_analysis`（PRD 起点）
+- `artifacts/02-prd/source-prd.md`、`prd-intake.md`（如有）
 - `.spec-manager/config.yaml` 是否存在
 - `specs/<topic>/` 下有哪些 L1/L2/L3
 - `artifacts/` 下已有哪些阶段产物
@@ -139,7 +146,8 @@ spec-manager task list --topic <topic>
 
 | 字段 | 说明 |
 | --- | --- |
-| App 名称/链接/安装包 | 分析对象；一个平台即可 |
+| App 名称/链接/安装包 | 分析对象；一个平台即可；有 PRD 时可选 |
+| 已有 PRD | `--prd` 路径/URL 或 `--prd-spec` L1 code |
 | 目标平台 | 由链接推断；iOS / Android；`both` 可选但不强制双链接 |
 | 技术栈 | RN / Flutter / Kotlin / Java / 待定 |
 | 现有仓库 | 路径、分支、是否可运行 |
@@ -160,6 +168,10 @@ spec-manager task list --topic <topic>
 current_stage: 0
 status: in_progress
 platform: auto
+prd_source: none
+prd_hash: null
+prd_mode: generate
+feature_analysis: pending
 spec_manager:
   project: <project>
   topic: <topic>
@@ -201,7 +213,7 @@ next_action: 完成项目建档、spec-manager 初始化与排期
 
 1. 宣布阶段编号、目标、执行 Agent、输入、预计产出。
 2. 用 skill 工具加载对应阶段 skill。
-3. 阶段 2/3：Codex 可用则生成 handoff packet、状态 `awaiting_codex`、暂停；Codex 不可用则自动 `codex_fallback`，由 OpenCode 直接执行 L1/L2。
+3. 阶段 2/3：Codex 可用则生成 handoff packet、状态 `awaiting_codex`、暂停；PRD 起点时 handoff 里写 `prd_mode=intake`；Codex 不可用则自动 `codex_fallback`，由 OpenCode 直接执行 L1/L2。
 4. 阶段 4/5：读取 confirmed L1/L2，创建/冻结 L3，创建 Task，再写代码/测试。
 5. 阶段 6/7：创建 L3.3/L3.4，完成商店文案与 Release/TestFlight。
 6. 阶段 8：创建 L3.5，归档 specs/design/store/release，生成 manifest/checksums/release summary。
@@ -215,7 +227,7 @@ next_action: 完成项目建档、spec-manager 初始化与排期
 | 阶段 | 执行 Agent | Skill | spec-manager |
 | --- | --- | --- | --- |
 | 0 启动 | OpenCode | 本 skill | project init + topic |
-| 1 功能分析 | OpenCode | `mobile-feature-analysis` | handoff packet |
+| 1 功能分析（可选） | OpenCode | `mobile-feature-analysis` | handoff packet；有 PRD 时可 skipped |
 | 2 主题 + 竞品 + PRD | **Codex** | `mobile-prd-authoring` | L1 |
 | 3 素材 + 5 图 + icon/splash | **Codex** | `mobile-ui-prototype` | L2 + DESIGN.md |
 | 4 框架 + 功能填充 | **OpenCode** | `mobile-app-implementation` | L3.1 + Task |
@@ -276,13 +288,16 @@ spec:
 - Target App:
 - Platform / stack / market:
 - spec topic:
+- PRD source (optional):
+- PRD mode: generate | intake
 - Feature KB:
-- Constraints: 二创/同品类、5 图定 P0、本地 mock、单端、不写代码
+- Constraints: 二创/同品类（PRD 起点以 PRD 为准）、5 图定 P0、本地 mock、单端、不写代码
 
 ## Stage 2 — L1 PRD
 - 先运行: spec-manager brief / spec list / decision list
 - 创建 L1: spec-manager spec new L1 --topic <topic> --title "<title>"
-- 写主题候选、评分、竞品矩阵、PRD、P0 5 屏草案、mock 数据、验收标准
+- generate: 写主题候选、评分、竞品矩阵、PRD、P0 5 屏草案、mock、验收标准
+- intake: 保存 source-prd.md + SHA256，写 prd-intake.md（章节/缺口/ID 映射），把 PRD 填入 L1，不改写范围
 - spec-manager spec validate <L1>
 - 停止等待人工确认；不要写 L2 或代码
 
@@ -322,6 +337,7 @@ L2 confirmed 后，OpenCode 接手：
 - 推荐主题及理由、备选主题，明确「基于目标 App 的二创/优化」
 - 竞品差异与风险
 - P0 5 屏分配草案、明确不做的事
+- PRD 起点：原始 PRD/hash、gap 分析、未改写范围
 - 数据源为本地 mock，Repository 接口
 - 关键假设与未决问题
 
@@ -390,6 +406,8 @@ L2 confirmed 后，OpenCode 接手：
 | 情况 | 处理 |
 | --- | --- |
 | 缺当前阶段必需输入 | 状态 `blocked`，列缺失项，等用户 |
+| PRD 文件不存在/无法读取 | 状态 `blocked`；PDF/DOCX 要求导出 Markdown，不猜测内容 |
+| PRD 缺章节/自相矛盾 | 写入 `prd-intake.md` gap/冲突；向用户确认，不擅自补写范围 |
 | 缺第二平台链接/安装包 | 不阻塞；按已有平台继续，另一平台标记可选后补 |
 | 缺开发者账号/签名/TF 权限 | 不阻塞阶段 0-6；阶段 7 再收集 |
 | 缺真实数据 API | 不阻塞；使用本地 mock，Repository 接口预留 |

@@ -1,10 +1,10 @@
 # 移动端全栈开发工作流
 
-> 版本: v0.4
+> 版本: v0.5
 > 更新: 2026-10-19
-> 修订: Codex 负责 L1/L2，OpenCode 负责 L3/Task/实现；Codex 未安装时自动降级 OpenCode；阶段 3 增加 app-icon/splash-screen；阶段 8 增加 archive 归档。
+> 修订: 支持以已有 PRD 为起点（跳过阶段 1-2 的生成，进入 L1 intake）；保留 Codex/OpenCode 路由、自动降级、icon/splash、阶段 8 archive。
 
-从「已上架 App 功能分析」到「TestFlight / 内测提测」的端到端工作流。每个阶段都有明确输入、产出、门禁和回退路径，AI Agent 可以断点续跑，人只在关键节点签核。
+从「已上架 App 功能分析或已有 PRD」到「TestFlight / 内测提测 + 归档」的端到端工作流。每个阶段都有明确输入、产出、门禁和回退路径，AI Agent 可以断点续跑，人只在关键节点签核。
 
 ## 1. 目标与适用范围
 
@@ -103,6 +103,15 @@ L1 PRD（Codex）
 - L3.2 依赖 L3.1；L3.3 依赖 L3.2；L3.4 依赖 L3.3；L3.5 依赖 L3.4。
 - 每次 Task 必须记录 steps 与 verification evidence，不能口头完成。
 - 规格变更走 `spec-manager change`，不要直接改已冻结 L3 的实现范围。
+- `--prd` 起点：阶段 1 可 skipped；阶段 2 进入 L1 intake，保留 source/hash/gap，不能重新生成 PRD 或改写范围。
+- `--prd-spec` 已 confirmed：直接进阶段 3；draft 则先做 L1 review。
+
+### PRD 起点
+
+- `--prd <path|url>`：阶段 1 可 skipped；阶段 2 进入 L1 intake；原始 PRD 保存到 `artifacts/02-prd/source-prd.md`，记录 SHA256 与 `prd-intake.md`。
+- `--prd-spec <L1-code>`：已 confirmed 直接进阶段 3；draft 先 review。
+- intake 模式不重新生成主题/竞品/PRD，也不改写用户范围；缺章节只提问/标 gap。
+- `--prd` 只从阶段 2 开始；要从阶段 3 开始请先导入 L1 并用 `--prd-spec`。
 
 ### 初始化
 
@@ -155,7 +164,7 @@ spec-manager assist acceptance <taskId>
 | 阶段 | 名称 | 执行 Agent | Skill | spec-manager | 关键产出 | 门禁 |
 | --- | --- | --- | --- | --- | --- | --- |
 | 0 | 启动与建档 | OpenCode | `mobile-workflow` | project init + topic | `00-intake.md`、`schedule.md`、`workflow-state.md` | G0 |
-| 1 | 功能分析与知识库 | OpenCode | `mobile-feature-analysis` | topic context | 功能清单、页面、流程、术语、Codex handoff | G1 |
+| 1 | 功能分析与知识库（可选） | OpenCode | `mobile-feature-analysis` | topic context | 功能清单、页面、流程、术语、Codex handoff | G1（有 PRD 时可跳过） |
 | 2 | 二创主题 + 竞品 + PRD | **Codex** | `mobile-prd-authoring` | **L1 PRD** | `theme.md`、`competitors.md`、`prd.md` | G2 |
 | 3 | 素材 + 5 图 + P0 锁定 | **Codex** | `mobile-ui-prototype` | **L2 Design** | 设计系统、5 屏、`specs/DESIGN.md`、P0 锁定 | G3 |
 | 4 | 框架 + P0 实现 | **OpenCode** | `mobile-app-implementation` | **L3.1 + Task** | 可运行 App、mock 数据层 | G4 |
@@ -236,6 +245,8 @@ artifacts/
 │   ├── glossary.md                # 术语与命名
 │   └── evidence/                  # 截图、录屏、页面结构导出
 ├── 02-prd/
+│   ├── source-prd.md              # PRD 起点：原始输入（不修改）
+│   ├── prd-intake.md              # PRD 起点：章节/缺口/ID 映射
 │   ├── theme.md                   # 创意主题与评分
 │   ├── competitors.md             # 竞品矩阵与证据
 │   ├── prd.md                     # 自洽 PRD
@@ -283,8 +294,9 @@ artifacts/
 
 输入：
 
-- App 名称 / 商店链接 / 安装包 / 截图 / 录屏（**一个平台即可**）
-- 目标平台（可由链接自动推断；另一平台可选后补）
+- App 名称 / 商店链接 / 安装包 / 截图 / 录屏（**一个平台即可**；有 PRD 时可选）
+- 已有 PRD：`--prd <path|url>` 或 `--prd-spec <L1-code>`（可选，PRD 起点）
+- 目标平台（可由链接/PRD 推断；另一平台可选后补）
 - 技术栈（RN / Flutter / Kotlin / Java / 待定）
 - 目标市场、语言、截止日期（可写 `auto`）、团队规模
 - 是否已有代码仓库、设计稿
@@ -296,26 +308,31 @@ artifacts/
 2. 从 `--app` 链接自动推断平台；只提供 iOS 就按 iOS 执行，不要求 Android 链接。
 3. 选择技术栈；如果用户未指定，给出 2-3 个选项和取舍，等待确认。
 4. 生成 `schedule.md`：按阶段估算、识别可并行工作流、计算关键路径与缓冲；截止日期不可行时自动给出缩范围或延期方案。
-5. 初始化 spec-manager：
+5. 判断起点：
+   - `--prd`：复制 PRD 到 `artifacts/02-prd/source/`，记录路径/SHA256，默认从阶段 2 的 L1 intake 开始。
+   - `--prd-spec`：读取现有 L1；confirmed 则默认从阶段 3 开始，draft 则先进入 L1 review。
+   - 无 PRD：从阶段 1 功能分析开始。
+6. 初始化 spec-manager：
    - `spec-manager project init --name <project>`
    - `spec-manager project agents --provider all`（或 `spec-manager codex install` + `spec-manager opencode install`）
    - `spec-manager project doctor`
    - 若已初始化则跳过，不覆盖已有 specs。
-6. 确定 spec topic（小写 slug，例如 `pinedrama-p0`），写入 `workflow-state.md`；后续 L1/L2/L3 都使用同一 topic。
-7. 检测 Codex：
+7. 确定 spec topic（小写 slug，例如 `pinedrama-p0`），写入 `workflow-state.md`；后续 L1/L2/L3 都使用同一 topic。
+8. 检测 Codex：
    ```bash
    command -v codex >/dev/null 2>&1 && codex --version
    ```
    - 可用：`agent_routing.stage_2_3=codex`、`codex_available=true`。
    - 未安装：自动 `stage_2_3=opencode`、`codex_fallback=true`；不阻塞。
-8. 初始化 `artifacts/`、`specs/`、`design/` 与 `workflow-state.md`。
-9. 确认合规边界：只分析公开可观察行为，不绕过付费/登录/DRM。
+9. 初始化 `artifacts/`、`specs/`、`design/` 与 `workflow-state.md`；若 PRD 起点，记录 `prd_source`、`prd_hash`、`prd_mode=intake`。
+10. 确认合规边界：只分析公开可观察行为，不绕过付费/登录/DRM。
 
 产出：`00-intake.md`、`schedule.md`、`workflow-state.md`、spec-manager 初始化状态。
 
 G0 门禁：
 
-- [ ] App 来源、目标平台（单端即可）、技术栈已明确
+- [ ] App 来源或 PRD 来源已明确（二者至少有其一）
+- [ ] 若提供 PRD，已复制/记录来源与 SHA256，起点阶段已确定
 - [ ] 合规边界已确认
 - [ ] `schedule.md` 已生成，包含并行工作流与关键路径
 - [ ] spec-manager 已初始化，topic 已确定，Codex/OpenCode 指令已安装
@@ -325,12 +342,15 @@ G0 门禁：
 
 ### 阶段 1：功能分析与知识库（G1）
 
-目标：产出一份「不看原 App 也能理解产品」的功能知识库。
+目标：产出一份「不看原 App 也能理解产品」的功能知识库。  
+**PRD 起点时可选**：有 PRD 且无 App 来源可直接跳过；有 App 来源时可做轻量分析，用于补充 PRD 未覆盖的功能/状态。
 
-输入：`00-intake.md`、**一个平台**的公开商店信息、截图/录屏、页面结构导出、帮助中心、公开评论。
+输入：`00-intake.md`、**一个平台**的公开商店信息、截图/录屏、页面结构导出、帮助中心、公开评论；可选 PRD。
 
 动作：
 
+0. **若 `prd_mode=intake` 且无 App 来源**：跳过本阶段，`G1: skipped`，直接进入阶段 2 的 L1 intake；不要伪造功能清单。
+   若提供了 App 来源：可只做与 PRD 对齐的轻量功能分析，补齐入口/状态/规则，不重复生成 PRD。
 1. 建立证据包：商店页、截图、录屏、页面结构、版本号、设备与系统。
 2. 页面级盘点：每个入口、Tab、菜单、设置项、弹窗、空态、错误态。
 3. 功能级盘点：用户目标、入口、前置条件、主路径、分支、结果、权限、数据、业务规则。
@@ -358,64 +378,86 @@ G1 门禁：
 - [ ] 未知项显式列出，未用猜测填充
 - [ ] 单端证据即可通过；另一平台缺失不阻塞
 - [ ] Codex 可用时 Handoff Packet 已生成；`codex_fallback` 时已记录降级原因
+- [ ] PRD 起点时：已标记 `G1: skipped`，或在轻量分析中补齐 PRD 缺口
 
-### 阶段 2：二创主题 + 竞品 + PRD（G2，Codex + L1）
+### 阶段 2：L1 PRD（G2，Codex + L1）
 
-目标：由 **Codex** 基于目标 App 收敛「二创/优化」主题，并把主题、竞品、PRD 写入 spec-manager **L1**；人类确认 L1 后才进入阶段 3。
+目标：把产品需求写入 spec-manager **L1**，人类确认后才进入阶段 3。  
+支持两种模式：**generate**（从功能知识库生成主题/竞品/PRD）与 **intake**（导入已有 PRD，规范化并补齐缺口）。
 
-输入：`01-feature-spec/`、`codex-handoff.md`、目标 App 品类/核心闭环、目标市场、约束、已有 decisions。
+输入：`01-feature-spec/`（可选）、`codex-handoff.md`、目标 App（可选）、已有 PRD、目标市场、约束、已有 decisions。
 
 动作：
 
-0. **若 `codex_fallback=true`**：跳过 handoff/Codex，由 OpenCode 按同一 L1 模板执行；在 L1 标记 `codex fallback`，其余门禁不变。
+0. **模式判断**：
+   - `prd_spec` 已 confirmed：`G2: passed (existing L1)`，跳过阶段 2，直接进入阶段 3。
+   - `prd_mode=intake` 且有 `--prd`：进入 PRD intake。
+   - 无 PRD：进入 generate 模式。
+   - `codex_fallback=true`：由 OpenCode 执行同一 L1 流程，标记 `codex fallback`；其余门禁不变。
 
-1. **OpenCode 准备 handoff**：生成 `codex-handoff.md`，写入 topic、L1 提示词、功能知识库路径、约束（二创、5 图定 P0、mock、单端、不写代码）。
-2. **Codex 开始前**：
+1. **PRD intake（有 `--prd`）**：
+   - 保存原始 PRD 到 `artifacts/02-prd/source-prd.md`；记录来源 URL/路径、日期、SHA256。
+   - 读取 PRD，产出 `artifacts/02-prd/prd-intake.md`：
+     - 已有章节：目标、用户、范围、P0、需求/验收、NFR、mock、5 屏分配、主题/竞品（如有）
+     - 缺失章节、冲突、不可判定项
+     - 需求 ID 映射：保留原 ID；没有则生成 `R-xxx`，并标注来源段落
+     - 假设与待确认项
+   - 创建 L1 并把 PRD 内容放入 L1 模板；保留原始措辞、范围与需求 ID，不擅自改写。
+   - 缺失章节只向用户提问或标为 gap；PDF/DOCX 先要求导出 Markdown，不猜测内容。
+   - `spec-manager spec validate <L1>`；停止等待人工确认。
+2. **generate 模式**（无 PRD）：
+   - 生成 3-5 个基于目标 App 的二创/优化主题；偏离品类/核心闭环的直接淘汰。
+   - 加权评分（含目标一致性），选 1 主 + 1 备选。
+   - 竞品 5-8 个；记录来源/日期、核心循环、变现、留存、UI、评论痛点。
+   - 写 PRD：目标、用户、范围、需求 ID、验收标准、NFR、埋点、权限、异常、依赖、发布标准、P0 5 屏草案、mock 策略。
+   - 自洽审计：主题一致性、功能 ↔ 需求、P0 ↔ 5 屏草案、术语、权限、mock。
+3. **Codex 开始前**（generate 或 intake 均可）：
    ```bash
-   spec-manager brief "<二创主题 + 竞品 + PRD>" --topic <topic>
+   spec-manager brief "<L1 PRD>" --topic <topic>
    spec-manager spec list --topic <topic>
    spec-manager decision list --topic <topic>
    ```
-3. **Codex 创建 L1**：
+4. **创建/更新 L1**：
    ```bash
    spec-manager spec new L1 --topic <topic> --title "<产品名> PRD"
    spec-manager template L1 --title "<产品名> PRD" --output .spec-manager/drafts/<topic>-L1.md
-   # Codex 填写主题候选、评分、竞品矩阵、PRD、P0 5 屏草案、mock 数据、验收标准
-   spec-manager spec update <L1> --content .spec-manager/drafts/<topic>-L1.md \
-     --ai-summary "<一句话摘要>" --change-summary "initial L1 PRD"
+   # generate: 填写主题/竞品/PRD；intake: 填入已有 PRD + gap 处理
+   spec-manager spec update <L1> --content .spec-manager/drafts/<topic>-L1.md      --ai-summary "<一句话摘要>" --change-summary "initial L1 PRD"
    spec-manager spec validate <L1>
    ```
-4. **Codex 停止**：L1 保持 `draft`，不得确认、不得写 L2、不得写代码。
-5. **人类审核 L1**：确认主题、竞品、范围、P0 5 屏草案、mock 策略、风险。
-6. 人工确认后由人（或经人明确授权的 OpenCode）执行：
+5. **Codex 停止**：L1 保持 `draft`，不得确认、不得写 L2、不得写代码。
+6. **人类审核 L1**：确认主题/范围/P0 5 屏草案/mock/风险；intake 模式额外确认原始 PRD 未被改写、gap 已处理。
+7. 人工确认后执行：
    ```bash
    spec-manager approve <L1>   # draft -> confirmed
    ```
-7. **Codex 导出可读工件**到 `02-prd/`：`theme.md`、`competitors.md`、`prd.md`、`decisions.md`；L1 才是源，artifacts 是阅读副本。
-8. 将 L1 code 写入 `workflow-state.md`，交给阶段 3。
+8. **导出可读工件**到 `02-prd/`：`theme.md`、`competitors.md`、`prd.md`、`decisions.md`；L1 是源，artifacts 是副本。
+9. 将 L1 code、`prd_source`、`prd_hash`、`prd_mode` 写入 `workflow-state.md`，交给阶段 3。
 
 约束：
 
 - Codex 只能写 L1 与阅读资料，不写实现代码。
+- intake 模式不重新生成主题/竞品；缺失时标 gap，由用户决定是否补研究。
 - 竞品数据必须有来源/日期；不编造下载量、收入、排名。
 - 主题必须同品类/同核心闭环；P0 先给 5 屏草案，最终由 L2 锁定。
 - 数据默认本地 mock；L1 不引入真实 API 依赖。
+- 原始 PRD 不得覆盖；保留 SHA256 以便审计。
 
-产出：spec-manager L1 + `02-prd/theme.md`、`competitors.md`、`prd.md`、`decisions.md`。
+产出：spec-manager L1 + `02-prd/source-prd.md`（intake）+ `prd-intake.md`（intake）+ `theme.md`、`competitors.md`、`prd.md`、`decisions.md`。
 
 G2 门禁：
 
 - [ ] L1 spec 已创建并 `validate` 通过
-- [ ] 主题与目标 App 同品类、同核心闭环，属于二创/优化而非无关转向
+- [ ] intake 模式：原始 PRD、SHA256、`prd-intake.md` 已保存；未改写原始范围；需求 ID 映射完整
+- [ ] generate 模式：主题与目标 App 同品类/同核心闭环；竞品有来源/日期
 - [ ] 每个 P0/P1 功能都有需求 ID 和验收标准
-- [ ] 每个需求都能追溯回功能或明确的商业目标
+- [ ] 每个需求都能追溯回功能/PRD 段落或商业目标
 - [ ] P0 已有 5 屏分配草案，未出现「无法落屏」的 P0
 - [ ] 数据源为本地 mock，Repository 接口已定义
-- [ ] 竞品结论有来源与日期，无编造数据
 - [ ] 范围内/范围外明确
 - [ ] 埋点、权限、非功能需求已定义
 - [ ] 人类明确确认 L1，`spec-manager approve <L1>` 已执行
-- [ ] L1 code 已写入 `workflow-state.md`
+- [ ] L1 code、`prd_source`、`prd_hash`、`prd_mode` 已写入 `workflow-state.md`
 
 ### 阶段 3：设计系统 + 5 图 + P0 锁定（G3，Codex + L2）
 
@@ -772,6 +814,10 @@ G8 门禁：
 current_stage: 3
 status: awaiting_codex   # pending | in_progress | awaiting_codex | awaiting_opencode | awaiting_human | blocked | done
 platform: ios
+prd_source: none            # path | url | spec-code | none
+prd_hash: null
+prd_mode: generate          # generate | intake
+feature_analysis: pending   # pending | done | skipped（PRD 起点可 skipped）
 spec_manager:
   project: pinedrama
   topic: pinedrama-p0
@@ -922,6 +968,7 @@ next_action: 等待 Codex 完成 L2 并人工确认
 - Agent 自批 L1/L2/L3，或伪造 Task step / verification evidence
 - 绕过 spec-manager 直接改实现范围，或 Codex 写代码 / OpenCode 私自改 L1/L2
 - 未完成 G8 archive 就宣布交付结束
+- PRD 起点未保存原始 PRD/hash/gap，或擅自改写用户 PRD 的范围
 
 ## 11. Definition of Done
 
@@ -941,6 +988,7 @@ next_action: 等待 Codex 完成 L2 并人工确认
 12. `workflow-state.md` 记录了 `spec topic`、L1/L2/L3 code、active task 与 next agent
 13. 下一个 Agent 只读 spec-manager + 产物即可接手，不需要追问上下文
 14. G8 archive 已完成：manifest、checksums、release summary、无密钥
+15. PRD 起点：`source-prd.md`、SHA256、`prd-intake.md` 与 L1 一致，未改写原始范围
 
 整个工作流完成（G8 通过）的定义：
 

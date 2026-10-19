@@ -18,6 +18,8 @@ description: 由 Codex 从 confirmed L1 产出素材需求清单、design tokens
 - 参考站点（awwwards 等），只提取风格思路
 - 数据策略：本地 mock 数据与 mock 资产
 
+若 L1 来自已有 PRD 且没有目标 App：以 PRD、用户提供的截图/品牌资产为设计参考；不要假装分析过原 App。
+
 ## Codex + spec-manager 模式（默认）
 
 本阶段由 **Codex** 执行，产出写入 spec-manager **L2**；人类确认后 OpenCode 才能写 L3/代码。

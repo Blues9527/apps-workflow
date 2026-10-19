@@ -1,5 +1,5 @@
 ---
-description: 启动移动端全栈工作流：OpenCode 分析，Codex 通过 spec-manager 写 L1 PRD/L2 设计+5图，OpenCode 写 L3/Task 实现与测试，再到商店文案/TestFlight；支持 --app/--topic/--spec-manager 等参数与 --help 指引
+description: 启动移动端全栈工作流：支持从目标 App 或已有 PRD 开始，Codex 通过 spec-manager 写 L1 PRD/L2 设计+5图，OpenCode 写 L3/Task 实现、测试、商店文案、TestFlight 与归档；支持 --app/--prd/--prd-spec/--topic 等参数与 --help 指引
 agent: build
 ---
 
@@ -15,7 +15,9 @@ $ARGUMENTS
 2. 参数大小写敏感，重复参数以最后一次为准。
 3. 优先级：命令行参数 > `artifacts/workflow-state.md` / `00-intake.md` > 交互提问。
 4. 未知参数不要猜测：列出本文档的有效参数并停止。
-5. 冲突参数直接报错：`--only-stage` 与 `--from-stage` 互斥；`--resume` 与 `--restart` 互斥。
+5. 冲突参数直接报错：`--only-stage` 与 `--from-stage` 互斥；`--resume` 与 `--restart` 互斥；`--prd` 与 `--prd-spec` 互斥。
+5.1 `--prd` 起点：默认从阶段 2 开始；只允许 `--from-stage 2` 或 `--only-stage 2`，其他阶段需先导入 L1 后用 `--prd-spec`。
+5.2 `--prd-spec`：L1 confirmed 自动从阶段 3 开始；draft 先进入阶段 2 review。
 6. 用户输入 `--help` 或 `-h` 时，只输出本文档的「参数」和「使用指引」，不执行工作流。
 7. 参数里不要传密钥、密码、Token、keystore 密码；这些只从环境变量或 Keychain 读取。
 
@@ -25,7 +27,9 @@ $ARGUMENTS
 
 | 参数 | 取值 | 默认 | 说明 |
 | --- | --- | --- | --- |
-| `--app` | 商店 URL / APK/IPA 路径 / App 名 | 无，阶段 1 前必填 | 分析对象；可写多个来源用引号包住 |
+| `--app` | 商店 URL / APK/IPA 路径 / App 名 | 无；无 PRD 时阶段 1 前必填 | 分析对象；有 `--prd`/`--prd-spec` 时可选 |
+| `--prd` | 文件路径 / URL | 无 | 从已有 PRD 开始；复制为 source-prd.md，阶段 1 可跳过，默认从阶段 2 intake |
+| `--prd-spec` | 现有 L1 code，如 `myapp-L1` | 无 | 已有 spec-manager L1；confirmed 则默认从阶段 3 开始 |
 | `--platform` | `auto` / `ios` / `android` / `both` | `auto` | 从 `--app` 链接自动推断；**一个平台链接即可**；`both` 是交付目标，缺少另一端时按已有平台继续 |
 | `--stack` | `auto` / `rn` / `flutter` / `kotlin` / `java` | `auto` | 有仓库时自动识别；无仓库时询问 |
 | `--market` | `cn` / `us` / `jp` / `zh-CN` / `en-US` 等 | 询问 | 目标市场与语言，影响竞品、ASO、文案 |
@@ -39,7 +43,7 @@ $ARGUMENTS
 
 | 参数 | 取值 | 默认 | 说明 |
 | --- | --- | --- | --- |
-| `--from-stage` | `0`-`8` | 有状态则续跑，否则 `0` | 从指定阶段开始；前置门禁必须已通过，不能跳过 |
+| `--from-stage` | `0`-`8` | 有状态续跑；`--prd` 时默认 `2` | 从指定阶段开始；前置门禁必须已通过，不能跳过 |
 | `--only-stage` | `0`-`8` | 无 | 只执行一个阶段，适合重跑某阶段；仍需满足该阶段输入与门禁 |
 | `--resume` | 开关 | 有状态时默认 | 从 `workflow-state.md` 断点续跑 |
 | `--restart` | 开关 | 无 | 把旧 `artifacts/` 归档到 `artifacts-archive/<时间戳>/` 后从 0 开始；执行前需人工确认 |
@@ -185,7 +189,26 @@ Agent 只会询问当前阶段真正缺失的信息；平台从链接推断，�
 
 缺少必填项时直接失败并列出缺项；到 G2/G3/G7 仍会暂停等人工确认。
 
-### 8. 指定 spec-manager topic
+### 8. 从已有 PRD 开始
+
+```text
+/mobile-flow --prd "./docs/prd.md" --platform ios --stack flutter --market us --topic myapp-p0
+```
+
+行为：
+
+- 原始 PRD 复制到 `artifacts/02-prd/source-prd.md`，记录 SHA256。
+- 阶段 1 可跳过（无 `--app` 时自动跳过）。
+- 阶段 2 进入 L1 intake：生成 `prd-intake.md`，保留原始范围/需求 ID，缺章节标 gap，不擅自补写。
+- 人工确认 L1 后进入阶段 3。
+
+已有 spec-manager L1：
+
+```text
+/mobile-flow --prd-spec myapp-L1 --from-stage 3
+```
+
+### 9. 指定 spec-manager topic
 
 ```text
 /mobile-flow --app "..." --topic pinedrama-p0 --spec-manager on
@@ -193,7 +216,7 @@ Agent 只会询问当前阶段真正缺失的信息；平台从链接推断，�
 
 阶段 2/3 的 L1/L2 与阶段 4/5 的 L3/Task 都使用同一 topic；`spec-manager flow status --topic pinedrama-p0` 查看依赖。
 
-### 9. 强制 OpenCode / Codex fallback
+### 10. 强制 OpenCode / Codex fallback
 
 ```text
 /mobile-flow --app "..." --codex off
@@ -201,7 +224,7 @@ Agent 只会询问当前阶段真正缺失的信息；平台从链接推断，�
 
 未安装 Codex 或使用 `--codex off` 时，阶段 2/3 自动由 OpenCode 执行，标记 `codex_fallback`，不阻塞流程。
 
-### 10. 只执行归档
+### 11. 只执行归档
 
 ```text
 /mobile-flow --only-stage 8 --topic pinedrama-p0
@@ -209,13 +232,13 @@ Agent 只会询问当前阶段真正缺失的信息；平台从链接推断，�
 
 创建 L3.5 Archive & Handoff，归档 specs/design/store/release，生成 manifest/checksums。
 
-### 11. 查看帮助
+### 12. 查看帮助
 
 ```text
 /mobile-flow --help
 ```
 
-### 12. 自然语言也可以
+### 13. 自然语言也可以
 
 ```text
 /mobile-flow 基于这个 iOS App 做优化，用 Flutter，目标美国市场，P0 按 5 图展示内容，数据先用本地 mock，最后提测 TestFlight
@@ -230,7 +253,9 @@ Agent 只会询问当前阶段真正缺失的信息；平台从链接推断，�
 - 每个阶段加载对应 skill，产物写入 `--artifacts` 指定目录（默认 `artifacts/`）。
 - 每个阶段结束检查门禁，未通过不进入下一阶段。
 - G2、G3、G7 停下来等人工确认，不要自己签核。
-- 主题必须基于目标 App 二创/优化；P0 以 5 图为最终边界。
+- 主题必须基于目标 App 二创/优化；有 PRD 时以 PRD 为准，不擅自改写范围。P0 以 5 图为最终边界。
+- `--prd` 起点：保存原始 PRD/hash，阶段 2 做 L1 intake；无 `--app` 时阶段 1 跳过，不伪造功能清单。
+- `--prd-spec` 已 confirmed 时直接进阶段 3；draft 时先 review L1。
 - 阶段 2/3 默认交给 Codex；先准备 handoff packet 并暂停，不要自己写 L1/L2。
 - 未安装 Codex 或 `--codex off` 时，自动降级 OpenCode 执行 L1/L2，标记 `codex_fallback`。
 - 阶段 4/5 由 OpenCode 执行；先写 L3 并冻结，再创建 Task 写代码。

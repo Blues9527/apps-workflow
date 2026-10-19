@@ -24,6 +24,16 @@ spec-manager brief "<request>" --topic <topic>
 spec-manager flow status --topic <topic>
 ```
 
+## 2.1 PRD 起点
+
+已有 PRD 时优先：
+
+```text
+/mobile-flow --prd <path|url> --topic <topic>
+```
+
+阶段 1 可跳过，阶段 2 进入 L1 intake；原始 PRD 复制到 `artifacts/02-prd/source-prd.md` 并记录 SHA256。
+
 ## 3. 规格链
 
 ```text

@@ -12,7 +12,9 @@
 | 目标 App |  |
 | 平台 / 技术栈 |  |
 | 目标市场 |  |
-| 功能知识库 | `artifacts/01-feature-spec/` |
+| 功能知识库 | `artifacts/01-feature-spec/`（可选） |
+| PRD 来源 | `artifacts/02-prd/source-prd.md`（intake 时） |
+| PRD 模式 | generate / intake |
 | 关键功能 ID |  |
 | 目标 App 品类/核心闭环 |  |
 | 约束 | 二创/同品类、5 图定 P0、本地 mock、单端、不写实现代码 |
@@ -40,7 +42,8 @@ spec-manager spec validate <L1>
 
 L1 必须包含：
 
-- 3-5 个基于目标 App 的二创/优化主题（含目标一致性评分）
+- generate：3-5 个基于目标 App 的二创/优化主题（含目标一致性评分）
+- intake：保留原始 PRD 范围/ID；生成 `prd-intake.md`；缺章节标 gap，不擅自补写
 - 5-8 个竞品（来源 + 日期；不编造数据）
 - PRD：用户、范围、需求 ID、验收标准、非功能、埋点、权限、异常、发布标准
 - P0 5 屏分配草案
