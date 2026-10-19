@@ -1,0 +1,21 @@
+{
+  "_comment": "agent planJson 模板。字段名必须是 stepNo / stepType / name。",
+  "coveredSpecs": ["<topic>-L3-impl"],
+  "steps": [
+    {
+      "stepNo": 1,
+      "stepType": "tool_action",
+      "name": "上下文收集: spec show L3 + 父 L2 + 读 specs/DESIGN.md"
+    },
+    {
+      "stepNo": 2,
+      "stepType": "tool_action",
+      "name": "编辑 <target-file> 实现 <specific-change>"
+    },
+    {
+      "stepNo": 3,
+      "stepType": "tool_action",
+      "name": "运行 <test-command> 验证 <expected-result>"
+    }
+  ]
+}
