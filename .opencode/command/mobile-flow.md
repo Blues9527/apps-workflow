@@ -33,7 +33,7 @@ $ARGUMENTS
 | `--prd` | 文件路径 / URL | 无 | 从已有 PRD 开始；复制为 source-prd.md，阶段 1 可跳过，默认从阶段 2 intake |
 | `--prd-spec` | 现有 L1 code，如 `myapp-L1` | 无 | 已有 spec-manager L1；confirmed 则默认从阶段 3 开始 |
 | `--platform` | `auto` / `ios` / `android` / `both` | `auto` | 从 `--app` 链接自动推断；**一个平台链接即可**；`both` 是交付目标，缺少另一端时按已有平台继续 |
-| `--stack` | `auto` / `rn` / `flutter` / `kotlin` / `java` | `auto` | 有仓库时自动识别；无仓库时询问 |
+| `--stack` | `auto` / `rn` / `flutter` / `kotlin` / `java` / `oc` / `swift` / `oc-swift` / `swift-swiftui` | `auto` | 有仓库时自动识别；无仓库时询问；`swift-swiftui` 为 Swift + SwiftUI |
 | `--market` | `cn` / `us` / `jp` / `zh-CN` / `en-US` 等 | 询问 | 目标市场与语言，影响竞品、ASO、文案 |
 | `--repo` | 目录路径 | 当前目录 | 现有代码仓库；没有则写 `none` |
 | `--scope` | 自由文本 | 询问 | 首版范围；P0 最终由 5 图锁定 |
@@ -193,7 +193,23 @@ Agent 只会询问当前阶段真正缺失的信息；平台从链接推断，�
 
 缺少必填项时直接失败并列出缺项；到 G2/G3/G7 仍会暂停等人工确认。
 
-### 8. 从已有 PRD 开始
+### 8. 原生 iOS 技术栈
+
+```text
+# 纯 Objective-C
+/mobile-flow --app "..." --app-name "DramaFlow" --platform ios --stack oc --market us --topic myapp-p0
+
+# 纯 Swift（UIKit）
+/mobile-flow --app "..." --app-name "DramaFlow" --platform ios --stack swift --market us --topic myapp-p0
+
+# OC & Swift 混编
+/mobile-flow --app "..." --app-name "DramaFlow" --platform ios --stack oc-swift --market us --topic myapp-p0
+
+# Swift & SwiftUI
+/mobile-flow --app "..." --app-name "DramaFlow" --platform ios --stack swift-swiftui --market us --topic myapp-p0
+```
+
+### 9. 从已有 PRD 开始
 
 ```text
 /mobile-flow --prd "./docs/prd.md" --app-name "DramaFlow" --platform ios --stack flutter --market us --topic myapp-p0
@@ -212,7 +228,7 @@ Agent 只会询问当前阶段真正缺失的信息；平台从链接推断，�
 /mobile-flow --prd-spec myapp-L1 --from-stage 3
 ```
 
-### 9. 指定 spec-manager topic
+### 10. 指定 spec-manager topic
 
 ```text
 /mobile-flow --app "..." --topic pinedrama-p0 --spec-manager on
@@ -220,7 +236,7 @@ Agent 只会询问当前阶段真正缺失的信息；平台从链接推断，�
 
 阶段 2/3 的 L1/L2 与阶段 4/5 的 L3/Task 都使用同一 topic；`spec-manager flow status --topic pinedrama-p0` 查看依赖。
 
-### 10. 强制 OpenCode / Codex fallback
+### 11. 强制 OpenCode / Codex fallback
 
 ```text
 /mobile-flow --app "..." --codex off
@@ -228,7 +244,7 @@ Agent 只会询问当前阶段真正缺失的信息；平台从链接推断，�
 
 未安装 Codex 或使用 `--codex off` 时，阶段 2/3 自动由 OpenCode 执行，标记 `codex_fallback`，不阻塞流程。
 
-### 11. 只执行归档
+### 12. 只执行归档
 
 ```text
 /mobile-flow --only-stage 8 --topic pinedrama-p0
@@ -236,13 +252,13 @@ Agent 只会询问当前阶段真正缺失的信息；平台从链接推断，�
 
 创建 L3.5 Archive & Handoff，归档 specs/design/store/release，生成 manifest/checksums。
 
-### 12. 查看帮助
+### 13. 查看帮助
 
 ```text
 /mobile-flow --help
 ```
 
-### 13. 自然语言也可以
+### 14. 自然语言也可以
 
 ```text
 /mobile-flow 基于这个 iOS App 做优化，用 Flutter，目标美国市场，P0 按 5 图展示内容，数据先用本地 mock，最后提测 TestFlight

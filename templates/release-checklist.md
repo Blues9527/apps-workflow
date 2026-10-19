@@ -38,6 +38,8 @@
 - [ ] 出口合规声明已确认
 - [ ] 深链/推送 entitlement 正确
 - [ ] 内购商品可测试
+- [ ] Swift/OC 混编：bridging header、@objc、nullability 正常
+- [ ] SwiftUI/UIKit：导航、启动屏、Preview/调试代码未进入 Release
 
 ## 3. Android（仅当目标平台为 Android）
 

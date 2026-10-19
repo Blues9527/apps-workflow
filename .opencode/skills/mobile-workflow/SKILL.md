@@ -151,7 +151,7 @@ spec-manager task list --topic <topic>
 | 新产品 App 名称 | `--app-name`；未提供则从 PRD/L1/主题推导，歧义时询问 |
 | 已有 PRD | `--prd` 路径/URL 或 `--prd-spec` L1 code |
 | 目标平台 | 由链接推断；iOS / Android；`both` 可选但不强制双链接 |
-| 技术栈 | RN / Flutter / Kotlin / Java / 待定 |
+| 技术栈 | RN / Flutter / Kotlin / Java / oc / swift / oc-swift / swift-swiftui / 待定 |
 | 现有仓库 | 路径、分支、是否可运行 |
 | 目标市场与语言 | 决定竞品、ASO、文案 |
 | spec topic | 小写 slug，L1/L2/L3 共用 |

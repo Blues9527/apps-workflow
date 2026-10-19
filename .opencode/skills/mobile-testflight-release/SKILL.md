@@ -103,7 +103,7 @@ flutter build ipa --release --export-method app-store
 flutter build appbundle --release
 ```
 
-**原生 iOS**
+**原生 iOS（OC / Swift / OC&Swift / SwiftUI）**
 
 ```bash
 xcodebuild -workspace <Name>.xcworkspace -scheme <Scheme> \
@@ -111,6 +111,13 @@ xcodebuild -workspace <Name>.xcworkspace -scheme <Scheme> \
 xcodebuild -exportArchive -archivePath build/<Name>.xcarchive \
   -exportOptionsPlist ExportOptions.plist -exportPath build/ipa
 ```
+
+原生 iOS 补充：
+
+- 先 `xcodebuild -list` 确认 workspace/scheme；有 `Podfile` 先 `pod install`，有 `Package.swift` 先 `swift package resolve`。
+- OC/Swift 混编检查 bridging header、`@objc` 暴露、nullability 与测试 target。
+- SwiftUI/UIKit 检查 AppIcon、启动屏、`NavigationStack`/`UINavigationController` 行为；Release 包不含 Preview/调试代码。
+- 用 `xcodebuild -showBuildSettings` 核对 `MARKETING_VERSION` / `CURRENT_PROJECT_VERSION`。
 
 **Kotlin / Java Android**
 

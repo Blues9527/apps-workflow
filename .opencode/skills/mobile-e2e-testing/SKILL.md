@@ -64,7 +64,19 @@ spec-manager task create <L3.2> --plan tasks/<topic>-L3-e2e-plan.json --start
 | Flutter | integration_test + Patrol | Patrol 支持原生弹窗与权限 |
 | Kotlin | Compose UI Test + Espresso + UIAutomator | 跨 App 系统交互用 UIAutomator |
 | Java | Espresso + UIAutomator | 同上 |
-| 原生 iOS | XCUITest | 系统权限/推送/深链验证 |
+| 原生 iOS（OC / Swift / OC&Swift） | XCUITest + XCTest | 系统权限/推送/深链验证；给控件加 accessibilityIdentifier |
+| SwiftUI | XCUITest + XCTest | 用 `.accessibilityIdentifier`/`.accessibilityLabel`，避免文本选择器 |
+
+原生 iOS 常用命令：
+
+```bash
+xcodebuild -list -workspace <Name>.xcworkspace
+xcodebuild test -workspace <Name>.xcworkspace -scheme <Scheme> \
+  -destination 'platform=iOS Simulator,name=iPhone 18 Pro' \
+  -only-testing:<Target>/<TestClass>
+```
+
+OC/Swift 混编不影响 UI 测试；确保 bridging header、测试 target 与 scheme 配置正确。SwiftUI 用 accessibilityIdentifier 覆盖按钮/列表/输入框，不靠文案。
 
 优先用仓库已有框架，不为了「新」引入第二套。
 

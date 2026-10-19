@@ -49,6 +49,8 @@ cp /path/to/apps-workflow/.opencode/command/mobile-flow.md ~/.config/opencode/co
 | Stitch MCP | 可选 | 5 图；不可用按 fallback |
 | Figma / Lark MCP | 可选 | 设计稿/协作 |
 | 图片生成（doubao/GPT） | 可选 | 插画/占位图 |
+| Xcode | 原生 iOS 必需 | Objective-C / Swift / SwiftUI / OC&Swift |
+| CocoaPods / SPM | 按仓库 | 原生 iOS 依赖管理 |
 
 首次在目标项目初始化：
 
@@ -208,7 +210,7 @@ spec-manager project doctor
 | `--prd` | 文件路径 / URL | 无 | 从已有 PRD 开始；默认从阶段 2 intake |
 | `--prd-spec` | 现有 L1 code | 无 | 已有 spec-manager L1；confirmed 默认从阶段 3 |
 | `--platform` | `auto` / `ios` / `android` / `both` | `auto` | 从链接推断；一个平台即可；`both` 缺少另一端时按已有平台继续 |
-| `--stack` | `auto` / `rn` / `flutter` / `kotlin` / `java` | `auto` | 有仓库时自动识别 |
+| `--stack` | `auto` / `rn` / `flutter` / `kotlin` / `java` / `oc` / `swift` / `oc-swift` / `swift-swiftui` | `auto` | 有仓库时自动识别；`swift-swiftui` = Swift + SwiftUI |
 | `--market` | `cn` / `us` / `jp` / `zh-CN` / `en-US` 等 | 询问 | 目标市场与语言 |
 | `--repo` | 目录路径 / `none` | 当前目录 | 现有仓库 |
 | `--scope` | 自由文本 | 询问 | 首版范围；P0 最终由 5 图锁定 |
@@ -245,6 +247,12 @@ spec-manager project doctor
 ```text
 # 全流程（单端链接即可，自动排期，3 个 Agent 并行）
 /mobile-flow --app "https://apps.apple.com/..." --app-name "DramaFlow" --platform auto --stack flutter --market us --scope "基于目标 App 的核心闭环做优化" --deadline auto --parallel 3
+
+# 原生 iOS：纯 OC / 纯 Swift / OC&Swift / Swift&SwiftUI
+/mobile-flow --app "..." --app-name "DramaFlow" --platform ios --stack oc --market us --topic myapp-p0
+/mobile-flow --app "..." --app-name "DramaFlow" --platform ios --stack swift --market us --topic myapp-p0
+/mobile-flow --app "..." --app-name "DramaFlow" --platform ios --stack oc-swift --market us --topic myapp-p0
+/mobile-flow --app "..." --app-name "DramaFlow" --platform ios --stack swift-swiftui --market us --topic myapp-p0
 
 # 分别从已有 PRD / 现有 L1 开始
 /mobile-flow --prd "./docs/prd.md" --app-name "DramaFlow" --platform ios --stack flutter --market us --topic myapp-p0
@@ -344,10 +352,23 @@ Codex 未安装时自动降级 OpenCode 执行阶段 2/3（`codex_fallback=true`
 - MCP: Stitch（已支持）、Figma、Lark
 - UI: Stitch、GPT、doubao、awwwards（仅参考）
 - 技术栈: React Native、Flutter、Kotlin、Java
+- 原生 iOS: Objective-C、Swift、OC&Swift 混编、Swift&SwiftUI
+- 原生工具: Xcode、SPM / CocoaPods、XCTest / XCUITest
 - 逆向: 可选 `rea` skill（环境提供时）；不可用则回退公开分析
 - 规范: 可选 OpenSpec 映射，见 `WORKFLOW.md` 第 8 节
 
 Stitch 相关 skill 使用 `stitch_*` MCP 工具：创建项目、设计系统、生成屏幕、变体、编辑与读取。没有 Stitch MCP 时，skill 会要求产出可复现的提示词和手工步骤，不伪造结果。
+
+## 原生 iOS 技术栈
+
+| `--stack` | 含义 | 默认 UI/状态 | 测试 |
+| --- | --- | --- | --- |
+| `oc` | 纯 Objective-C | UIKit + MVC/MVVM | XCTest + XCUITest |
+| `swift` | 纯 Swift（UIKit） | UIKit + MVVM + async/await | XCTest + XCUITest |
+| `oc-swift` | OC & Swift 混编 | UIKit + bridging header/@objc | XCTest + XCUITest |
+| `swift-swiftui` | Swift + SwiftUI | SwiftUI + NavigationStack/@Observable | XCTest + XCUITest |
+
+规则：先 `xcodebuild -list` 确认 workspace/scheme；SPM 与 CocoaPods 按仓库现状；混编保留 bridging header/nullability，新代码默认 Swift；SwiftUI 与 UIKit 互通用 `UIHostingController`，不混用两套导航。
 
 ## 使用注意事项
 

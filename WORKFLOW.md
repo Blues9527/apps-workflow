@@ -12,7 +12,7 @@
 
 - 基于已有上架 App 做功能拆解，重构或开发同类产品
 - 从功能知识库出发，完成主题、竞品、PRD、UI、开发、测试、商店文案、提测
-- 技术栈为 RN、Flutter、Kotlin、Java，交付 iOS / Android 移动应用
+- 技术栈为 RN、Flutter、Kotlin、Java、Objective-C、Swift、OC&Swift 混编、Swift&SwiftUI，交付 iOS / Android 移动应用
 
 不适用场景：
 
@@ -301,7 +301,7 @@ artifacts/
 - 新产品 App 名称 `--app-name`（可选；未提供则从 PRD/L1/主题推导，歧义时询问）
 - 已有 PRD：`--prd <path|url>` 或 `--prd-spec <L1-code>`（可选，PRD 起点）
 - 目标平台（可由链接/PRD 推断；另一平台可选后补）
-- 技术栈（RN / Flutter / Kotlin / Java / 待定）
+- 技术栈（RN / Flutter / Kotlin / Java / oc / swift / oc-swift / swift-swiftui / 待定）
 - 目标市场、语言、截止日期（可写 `auto`）、团队规模
 - 是否已有代码仓库、设计稿
 - 发布账号/签名/TestFlight 权限（**阶段 7 前可不提供**）
@@ -893,16 +893,23 @@ next_action: 等待 Codex 完成 L2 并人工确认
 
 ## 7. 技术栈适配
 
-| 栈 | 导航 | 状态 | 网络 | 存储 | UI/测试 |
+| 栈 | UI/导航 | 状态 | 网络 | 存储 | 测试 |
 | --- | --- | --- | --- | --- | --- |
 | RN | React Navigation / Expo Router | Zustand / Redux Toolkit | TanStack Query + fetch/axios | MMKV / AsyncStorage | RNTL + Maestro/Detox |
 | Flutter | go_router | Riverpod / Bloc | Dio | Drift / Hive | Patrol + integration_test |
 | Kotlin | Navigation Compose | ViewModel + Flow | Retrofit/OkHttp | Room | Compose Test + Espresso |
 | Java | Navigation Component | ViewModel + LiveData | Retrofit/OkHttp | Room | JUnit + Espresso |
+| oc | UIKit + UINavigationController | MVC / MVVM | NSURLSession | Core Data / UserDefaults / Keychain | XCTest + XCUITest |
+| swift | UIKit + UINavigationController | MVVM + async/await | URLSession | Core Data / UserDefaults / Keychain | XCTest + XCUITest |
+| oc-swift | UIKit + Swift interop | MVVM + @objc/bridging | URLSession | Core Data / UserDefaults / Keychain | XCTest + XCUITest |
+| swift-swiftui | SwiftUI + NavigationStack | @State / @Observable / Combine | async/await URLSession | SwiftData / Core Data / UserDefaults | XCTest + XCUITest |
 
 约束：
 
 - 优先沿用仓库已有依赖，不引入第二套导航/状态/网络库。
+- OC/Swift 混编：保留 bridging header、`@objc` 暴露与 nullability；新代码默认 Swift，避免重复网络/状态层。
+- SwiftUI：用 `NavigationStack` 与 `@State/@Observable`；需要 UIKit 时通过 `UIHostingController` 互操作，不混用两套导航。
+- 原生 iOS：SPM 与 CocoaPods 按仓库现状；先 `xcodebuild -list` 确认 workspace/scheme，不猜工程名。
 - 新项目先写 `architecture.md`，说明选择与放弃理由。
 - 不把平台特定实现硬塞进跨端抽象；跨端只共享领域模型与业务规则。
 - 设计 tokens 用一套源文件生成各端主题，避免手抄色值。

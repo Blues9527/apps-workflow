@@ -18,7 +18,7 @@
 | feature_analysis | pending / done / skipped（PRD 起点可 skipped） |
 | 版本号 |  |
 | 目标平台 | 由链接推断（iOS / Android）；双端可选 |
-| 技术栈 | RN / Flutter / Kotlin / Java / 待定 |
+| 技术栈 | RN / Flutter / Kotlin / Java / oc / swift / oc-swift / swift-swiftui / 待定 |
 | 现有仓库 |  |
 | 目标市场 |  |
 | 目标语言 |  |
